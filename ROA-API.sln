@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROA.Rest.API", "ROA.Rest.API\ROA.Rest.API.csproj", "{7670B8F7-1B80-4762-9B40-38A340CDC179}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7670B8F7-1B80-4762-9B40-38A340CDC179}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7670B8F7-1B80-4762-9B40-38A340CDC179}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7670B8F7-1B80-4762-9B40-38A340CDC179}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7670B8F7-1B80-4762-9B40-38A340CDC179}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
