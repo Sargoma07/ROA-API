@@ -98,5 +98,6 @@ public class DataContext : IDataContext
     private static void CreateModelMap()
     {
         InventoryMap.CreateMap();
+        PlayerMap.CreateMap();
     }
 }

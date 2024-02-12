@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ROA.Data;
 using ROA.Data.Contract;
 using ROA.Data.Contract.Repositories;
@@ -59,25 +60,32 @@ public class Program
         ConfigureSettings(builder);
         ConfigureServices(builder);
 
-        builder.Services.AddControllers();
+        builder.Services
+            .AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+
         builder.Services.AddHttpContextAccessor();
         return builder;
     }
 
-    private static void ConfigureServices(WebApplicationBuilder builder)
+    private static void ConfigureServices(IHostApplicationBuilder builder)
     {
         ConfigureRepositories(builder);
     }
 
-    private static void ConfigureRepositories(WebApplicationBuilder builder)
+    private static void ConfigureRepositories(IHostApplicationBuilder builder)
     {
         DataContext.CreateMaps();
 
         builder.Services.AddSingleton<IDataContext, DataContext>();
 
         builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
+        builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
 
-        builder.Services.AddSingleton<IDataContextManager, DataContextManager>();
+        builder.Services.AddScoped<IDataContextManager, DataContextManager>();
     }
 
     private static void ConfigureSettings(WebApplicationBuilder builder)

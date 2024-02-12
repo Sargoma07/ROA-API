@@ -9,4 +9,10 @@ public interface IInventoryRepository: IRepository
     void AddOrUpdate(Inventory inventory);
     
     void Delete(Inventory inventory);
+    
+    Task<Inventory?> GetStorage(string playerId);
+    
+    Task<Inventory?> GetInventory(string playerId);
+    
+    Task<Inventory?> GetEquipment(string playerId);
 }

@@ -71,7 +71,7 @@ public abstract class AbstractRepository<T> where T : IEntity
         return data.LoadToContext(_context);
     }
 
-    public virtual async Task<T> GetByIdAsync(string id)
+    public virtual async Task<T?> GetByIdAsync(string id)
     {
         var data = await GetQuery().SingleOrDefaultAsync(x => x.Id == id);
         return data.LoadToContext(_context);

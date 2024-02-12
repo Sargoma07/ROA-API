@@ -12,6 +12,7 @@
   
   roa.rest.api:
     image: roa.rest.api
+    container_name: "roa.rest.api"
     depends_on:
       - "roa.db"
     build:
@@ -23,7 +24,16 @@
       - api_data_protection_container:/root/.aspnet/DataProtection-Keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-        
+      
+  roa.db.migrations:
+    image: roa-db-migrations
+    container_name: "roa.db.migrations"
+    depends_on:
+      - "roa.db"
+    build:
+      context: .
+      dockerfile: Roa.Data.Migrations/Dockerfile
+
 volumes:
   mongodb_data_container:
   api_data_protection_container:
