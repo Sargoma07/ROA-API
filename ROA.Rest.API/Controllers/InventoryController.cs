@@ -1,165 +1,41 @@
-using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using ROA.Data.Contract;
-using ROA.Data.Contract.Repositories;
-using ROA.Model;
-using ROA.Rest.API.Mappers;
-using ROA.Rest.API.Models;
 
 namespace ROA.Rest.API.Controllers
 {
-    [Produces(MediaTypeNames.Application.Json)]
     [Route("api/[controller]")]
     [ApiController]
-    public class InventoryController(
-        IDataContextManager dataContextManager,
-        IMapperFactory mapperFactory,
-        ILogger<InventoryController> logger)
-        : AbstractController(dataContextManager, mapperFactory, logger)
+    public class InventoryController : ControllerBase
     {
-        [HttpGet("player/{playerId}/inventory")]
-        public async Task<ActionResult<Inventory>> GetInventory(string playerId)
+        // GET: api/<Inventory>
+        [HttpGet]
+        public IEnumerable<string> Get()
         {
-            var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
-            var inventory = await inventoryRepository.GetInventory(playerId);
-
-            if (inventory == null)
-            {
-                return NotFound();
-            }
-
-            return inventory;
+            return new string[] { "value1", "value2" };
         }
 
-        [HttpGet("player/{playerId}/storage")]
-        public async Task<ActionResult<Inventory>> GetStorage(string playerId)
+        // GET api/<Inventory>/5
+        [HttpGet("{id}")]
+        public string Get(int id)
         {
-            var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
-            var inventory = await inventoryRepository.GetStorage(playerId);
-
-            if (inventory == null)
-            {
-                return NotFound();
-            }
-
-            return inventory;
+            return "value";
         }
 
-        [HttpGet("player/{playerId}/equipment")]
-        public async Task<ActionResult<Inventory>> GetEquipment(string playerId)
+        // POST api/<Inventory>
+        [HttpPost]
+        public void Post([FromBody] string value)
         {
-            var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
-            var inventory = await inventoryRepository.GetEquipment(playerId);
-
-            if (inventory == null)
-            {
-                return NotFound();
-            }
-
-            return inventory;
         }
 
-        [HttpPut("player/{playerId}/inventory")]
-        public async Task<ActionResult<Inventory>> UpdateInventory(string playerId,
-            [FromBody] InventoryUpdateSlotsModel request)
+        // PUT api/<Inventory>/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
         {
-            using var _ = logger.BeginScope(new Dictionary<string, object> { { "PlayerId", playerId } });
-
-            var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
-            var inventory = await inventoryRepository.GetInventory(playerId);
-
-            if (inventory == null)
-            {
-                var playerRepository = DataContextManager.CreateRepository<IPlayerRepository>();
-                var player = await playerRepository.GetByIdAsync(playerId);
-
-                if (player is null)
-                {
-                    return NotFound();
-                }
-
-                inventory = Inventory.CreateInventory(playerId, request.Slots);
-            }
-            else
-            {
-                inventory.Slots = request.Slots;
-            }
-
-            inventoryRepository.AddOrUpdate(inventory);
-
-            await DataContextManager.SaveAsync();
-
-            logger.LogInformation("Inventory {inventoryId} updated", inventory.Id);
-            return inventory;
         }
 
-        [HttpPut("player/{playerId}/storage")]
-        public async Task<ActionResult<Inventory>> UpdateStorage(string playerId,
-            [FromBody] InventoryUpdateSlotsModel request)
+        // DELETE api/<Inventory>/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
         {
-            using var _ = logger.BeginScope(new Dictionary<string, object> { { "PlayerId", playerId } });
-
-            var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
-            var inventory = await inventoryRepository.GetStorage(playerId);
-
-            if (inventory == null)
-            {
-                var playerRepository = DataContextManager.CreateRepository<IPlayerRepository>();
-                var player = await playerRepository.GetByIdAsync(playerId);
-
-                if (player is null)
-                {
-                    return NotFound();
-                }
-
-                inventory = Inventory.CreateStorage(playerId, request.Slots);
-            }
-            else
-            {
-                inventory.Slots = request.Slots;
-            }
-
-            inventoryRepository.AddOrUpdate(inventory);
-
-            await DataContextManager.SaveAsync();
-
-            logger.LogInformation("Storage {inventoryId} updated", inventory.Id);
-            return inventory;
-        }
-
-        [HttpPut("player/{playerId}/equipment")]
-        public async Task<ActionResult<Inventory>> UpdateEquipment(string playerId,
-            [FromBody] InventoryUpdateSlotsModel request)
-        {
-            using var _ = logger.BeginScope(new Dictionary<string, object> { { "PlayerId", playerId } });
-
-            var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
-
-            var inventory = await inventoryRepository.GetEquipment(playerId);
-
-            if (inventory == null)
-            {
-                var playerRepository = DataContextManager.CreateRepository<IPlayerRepository>();
-                var player = await playerRepository.GetByIdAsync(playerId);
-
-                if (player is null)
-                {
-                    return NotFound();
-                }
-
-                inventory = Inventory.CreateEquipment(playerId, request.Slots);
-            }
-            else
-            {
-                inventory.Slots = request.Slots;
-            }
-
-            inventoryRepository.AddOrUpdate(inventory);
-
-            await DataContextManager.SaveAsync();
-
-            logger.LogInformation("Equipment {inventoryId} updated", inventory.Id);
-            return inventory;
         }
     }
 }
