@@ -3,6 +3,7 @@ using ROA.Data;
 using ROA.Data.Contract;
 using ROA.Data.Contract.Repositories;
 using ROA.Data.Repositories;
+using ROA.Rest.API.Mappers;
 using Serilog;
 
 namespace ROA.Rest.API;
@@ -73,6 +74,7 @@ public class Program
 
     private static void ConfigureServices(IHostApplicationBuilder builder)
     {
+        MapperFactory.Configure(builder.Services);
         ConfigureRepositories(builder);
     }
 
@@ -84,6 +86,8 @@ public class Program
 
         builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
         builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
+        builder.Services.AddSingleton<IPaymentRepository, PaymentRepository>();
+        builder.Services.AddSingleton<IItemPriceRepository, ItemPriceRepository>();
 
         builder.Services.AddScoped<IDataContextManager, DataContextManager>();
     }

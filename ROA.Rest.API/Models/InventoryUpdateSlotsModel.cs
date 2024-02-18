@@ -2,7 +2,7 @@
 
 namespace ROA.Rest.API.Models;
 
-public class InventoryUpdateSlots
+public class InventoryUpdateSlotsModel
 {
     public IList<InventoryItemSlot> Slots { get; set; } = new List<InventoryItemSlot>();
 }

@@ -99,5 +99,7 @@ public class DataContext : IDataContext
     {
         InventoryMap.CreateMap();
         PlayerMap.CreateMap();
+        PaymentMap.CreateMap();
+        ItemPriceMap.CreateMap();
     }
 }

@@ -7,7 +7,7 @@ public class Inventory : IEntity
 {
     public string Id { get; set; }
     public Guid ETag { get; set; }
-    public string PlayerId { get; set; }
+    public required string PlayerId { get; set; }
     public InventoryType Type { get; set; }
     public IList<InventoryItemSlot> Slots { get; set; } = new List<InventoryItemSlot>();
 
