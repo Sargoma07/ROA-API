@@ -2,7 +2,6 @@
 using CommandLine;
 using Microsoft.Extensions.Configuration;
 using MongoDBMigrations;
-using ROA.Data;
 
 public class Options
 {
@@ -24,8 +23,6 @@ public static class Program
         var config = new ConfigurationBuilder()
                    .AddJsonFile("appsettings.json", optional: false)
                    .Build();
-
-        ConfigureMap();
 
         var connectionSettings = config.GetSection("MongoConnection");
         var connectionString = connectionSettings.GetValue<string>("ConnectionString");
@@ -76,10 +73,5 @@ public static class Program
         }
        
         Console.WriteLine("Update completed");
-    }
-
-    private static void ConfigureMap()
-    {
-        DataContext.CreateMaps();
     }
 }

@@ -1,5 +1,4 @@
-using ROA.Model.Statuses;
-using ROA.Model.Types;
+using ROA.Rest.API.Domain.Statuses;
 
 namespace ROA.Rest.API.Models;
 

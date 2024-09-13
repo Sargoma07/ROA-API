@@ -2,12 +2,11 @@ using System.Text.Json.Serialization;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using ROA.Data;
-using ROA.Data.Contract;
-using ROA.Data.Contract.Repositories;
-using ROA.Data.Repositories;
+using ROA.Rest.API.Data;
+using ROA.Rest.API.Data.Repositories;
 using ROA.Rest.API.Extensions;
 using ROA.Rest.API.Mappers;
+using ROA.Rest.API.Settings;
 using Serilog;
 
 namespace ROA.Rest.API;

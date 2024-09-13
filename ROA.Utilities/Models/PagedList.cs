@@ -1,5 +1,4 @@
-﻿using System;
-namespace ROA.Utilities.Models
+﻿namespace ROA.Utilities.Models
 {
     public class PagedList<T> 
     {

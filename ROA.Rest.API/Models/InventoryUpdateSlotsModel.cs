@@ -1,4 +1,4 @@
-﻿using ROA.Model;
+﻿using ROA.Rest.API.Domain;
 
 namespace ROA.Rest.API.Models;
 

@@ -1,8 +1,8 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using ROA.Data.Contract;
-using ROA.Data.Contract.Repositories;
-using ROA.Model;
+using ROA.Rest.API.Data;
+using ROA.Rest.API.Data.Repositories;
+using ROA.Rest.API.Domain;
 using ROA.Rest.API.Mappers;
 using ROA.Rest.API.Models;
 

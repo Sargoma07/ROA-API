@@ -1,5 +1,5 @@
 using AutoMapper;
-using ROA.Model;
+using ROA.Rest.API.Domain;
 using ROA.Rest.API.Models;
 
 namespace ROA.Rest.API.Mappers;
