@@ -10,7 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROA.Utilities", "ROA.Utilit
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F4431588-46D9-4C76-A61D-40A45A72D181}"
 	ProjectSection(SolutionItems) = preProject
-		docker-compose.yml = docker-compose.yml
+		docker-compose-api.yml = docker-compose-api.yml
+		docker-componse-grafana.yml = docker-componse-grafana.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROA.Data.Contract", "ROA.Data.Contract\ROA.Data.Contract.csproj", "{857D39B1-61AA-4BA7-B6C6-5697357A06EB}"

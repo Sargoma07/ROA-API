@@ -5,6 +5,7 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 using ROA.Data.Contract;
 using ROA.Data.Mapping;
 using ROA.Model.Contract;
@@ -38,7 +39,9 @@ public class DataContext : IDataContext
 
     public DataContext(IOptions<ConnectionDatabaseSettings> connectionSettings)
     {
-        _client = new MongoClient(connectionSettings.Value.ConnectionString);
+        var clientSettings = MongoClientSettings.FromConnectionString(connectionSettings.Value.ConnectionString);
+        clientSettings.ClusterConfigurator = cb => cb.Subscribe(new DiagnosticsActivityEventSubscriber());
+        _client = new MongoClient(clientSettings);
         Database = _client.GetDatabase(connectionSettings.Value.DatabaseName);
         _commands = new List<Func<Task>>();
     }

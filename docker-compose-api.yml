@@ -2,6 +2,8 @@
   roa.db:
     container_name: "roa.db"
     image: mongo:latest
+    labels:
+      - "app.roa"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
@@ -13,6 +15,9 @@
   roa.rest.api:
     image: roa.rest.api
     container_name: "roa.rest.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
     depends_on:
       - "roa.db"
     build:
@@ -28,6 +33,8 @@
   roa.db.migrations:
     image: roa-db-migrations
     container_name: "roa.db.migrations"
+    labels:
+      - "app.roa"
     depends_on:
       - "roa.db"
     build:

@@ -1,0 +1,80 @@
+﻿logging {
+    level  = "info"
+    format = "logfmt"
+}
+
+discovery.docker "roa_api" {
+    host = "tcp://host.docker.internal:2375"
+    filter {
+        name = "label"
+        values = ["app.roa.api"]
+    }
+}
+
+loki.source.docker "roa_api" {
+    host       = "tcp://host.docker.internal:2375"
+    targets    = discovery.docker.roa_api.targets
+    labels     = {"source" = "docker"}
+    forward_to = [loki.process.format.receiver]
+}
+
+loki.process "format" {
+    forward_to = [loki.relabel.info.receiver]
+  
+    stage.json {
+        expressions = {
+            time = "\"@t\"", 
+            message = "\"@m\"", 
+            level = "\"@l\"",
+            traceId = "\"@tr\"", 
+            spanId = "\"@sp\"",  
+            statusCode = "StatusCode",
+            method = "Method",
+            requestPath = "RequestPath",
+            app = "Application",
+        }
+    }
+  
+    stage.timestamp {
+        source = "time"
+        format = "RFC3339Nano"
+    }
+
+    stage.labels {
+        values = { 
+            time = "", 
+            level = "", 
+            message = "",
+            traceId = "",
+            spanId = "",
+            statusCode = "",
+            requestPath = "",
+            method = "",
+            app = "",
+        }
+    }
+}
+
+loki.relabel "info" {
+    forward_to = [loki.write.grafana_loki.receiver]
+
+    rule {
+        action        = "replace"
+        source_labels = ["level"]
+        target_label  = "level"
+        replacement = "Info"
+        regex         = "\\s*"
+    }
+}
+
+
+loki.write "grafana_loki" {
+    endpoint {
+        url = "http://grafana.loki:3100/loki/api/v1/push"
+
+        //basic_auth {
+            //username = "admin"
+            //password = "admin"
+        //}
+    }
+}

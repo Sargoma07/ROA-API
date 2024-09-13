@@ -1,8 +1,12 @@
 using System.Text.Json.Serialization;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using ROA.Data;
 using ROA.Data.Contract;
 using ROA.Data.Contract.Repositories;
 using ROA.Data.Repositories;
+using ROA.Rest.API.Extensions;
 using ROA.Rest.API.Mappers;
 using Serilog;
 
@@ -12,17 +16,6 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-                                        ?? "Production"}.json", true)
-            .Build();
-
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .CreateLogger();
-
         var builder = CreateBuilder(args);
 
         var app = builder.Build();
@@ -49,6 +42,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        ConfigureLogger();
+        
+        ConfigureTracing(builder);
+
         builder.Host.UseSerilog();
 
         // Add services to the container.
@@ -70,6 +67,47 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         return builder;
+    }
+
+    private static void ConfigureLogger()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                                        ?? "Production"}.json", true)
+            .Build();
+
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .CreateLogger();
+    }
+
+    private static void ConfigureTracing(WebApplicationBuilder builder)
+    {
+        var settings = builder.Configuration.GetSection("Tracing").Get<TracingSettings>();
+
+        if (settings == null)
+        {
+            return;
+        }
+
+        builder.Services.AddOpenTelemetry()
+            .WithTracing(tracerBuilder =>
+            {
+                tracerBuilder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(settings.ServiceName))
+                    .AddHttpClientInstrumentation()
+                    .AddAspNetCoreInstrumentation()
+                    .AddMongoDbInstrumentation()
+                    .AddOtlpExporter(o =>
+                    {
+                        o.Endpoint = new Uri(settings.Url);
+                        o.Protocol = settings.Protocol == TracingProtocol.Grpc
+                            ? OtlpExportProtocol.Grpc
+                            : OtlpExportProtocol.HttpProtobuf;
+                    });
+            });
     }
 
     private static void ConfigureServices(IHostApplicationBuilder builder)
