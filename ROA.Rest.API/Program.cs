@@ -2,9 +2,11 @@ using System.Text.Json.Serialization;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using ROA.Rest.API.Data;
+using ROA.Infrastructure.Data;
+using ROA.Infrastructure.Data.Mongo;
+using ROA.Infrastructure.Trace.Extensions;
+using ROA.Rest.API.Data.Mapping;
 using ROA.Rest.API.Data.Repositories;
-using ROA.Rest.API.Extensions;
 using ROA.Rest.API.Mappers;
 using ROA.Rest.API.Settings;
 using Serilog;
@@ -55,7 +57,7 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         ConfigureSettings(builder);
-        ConfigureServices(builder);
+        ConfigureRepositories(builder);
 
         builder.Services
             .AddControllers()
@@ -109,19 +111,14 @@ public class Program
             });
     }
 
-    private static void ConfigureServices(IHostApplicationBuilder builder)
-    {
-        MapperFactory.Configure(builder.Services);
-        ConfigureRepositories(builder);
-    }
-
     private static void ConfigureRepositories(IHostApplicationBuilder builder)
     {
-        DataContext.CreateMaps();
+        MapperFactory.Configure(builder.Services);
+        
+        DataContextMap.CreateMaps();
 
         builder.Services.AddSingleton<IDataContext, DataContext>();
 
-        builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
         builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
         builder.Services.AddSingleton<IPaymentRepository, PaymentRepository>();
         builder.Services.AddSingleton<IItemPriceRepository, ItemPriceRepository>();

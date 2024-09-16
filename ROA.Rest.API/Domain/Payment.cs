@@ -1,3 +1,4 @@
+using ROA.Infrastructure.Domain;
 using ROA.Rest.API.Domain.Statuses;
 
 namespace ROA.Rest.API.Domain;

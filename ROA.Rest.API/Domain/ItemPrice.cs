@@ -1,3 +1,5 @@
+using ROA.Infrastructure.Domain;
+
 namespace ROA.Rest.API.Domain;
 
 public class ItemPrice : IEntity

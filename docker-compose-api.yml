@@ -18,11 +18,31 @@
     labels:
       - "app.roa"
       - "app.roa.api"
+      - "app.roa.api.rest"
     depends_on:
       - "roa.db"
     build:
       context: .
       dockerfile: ROA.Rest.API/Dockerfile
+    ports:
+      - "8080"
+    volumes:
+      - api_data_protection_container:/root/.aspnet/DataProtection-Keys
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  
+  roa.inventory.api:
+    image: roa.inventory.api
+    container_name: "roa.inventory.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
+      - "app.roa.api.inventory"
+    depends_on:
+      - "roa.db"
+    build:
+      context: .
+      dockerfile: ROA.Inventory.API/Dockerfile
     ports:
       - "8080"
     volumes:
@@ -55,6 +75,7 @@
       - "5001:443"
     depends_on:
       - "roa.rest.api"
+      - "roa.inventory.api"
 
 volumes:
   mongodb_data_container:

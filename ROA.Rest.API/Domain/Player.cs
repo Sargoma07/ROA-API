@@ -1,4 +1,6 @@
-﻿namespace ROA.Rest.API.Domain;
+﻿using ROA.Infrastructure.Domain;
+
+namespace ROA.Rest.API.Domain;
 
 public class Player: IEntity
 {

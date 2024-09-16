@@ -11,5 +11,5 @@ public class TracingSettings
 public enum TracingProtocol
 {
     Grpc,
-    Protobuf
+    HttpProtobuf
 }

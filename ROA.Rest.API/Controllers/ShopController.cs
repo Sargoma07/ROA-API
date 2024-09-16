@@ -1,6 +1,6 @@
 ﻿using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using ROA.Rest.API.Data;
+using ROA.Infrastructure.Data;
 using ROA.Rest.API.Data.Repositories;
 using ROA.Rest.API.Domain;
 using ROA.Rest.API.Domain.Statuses;

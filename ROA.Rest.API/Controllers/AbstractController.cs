@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ROA.Rest.API.Data;
+using ROA.Infrastructure.Data;
 using ROA.Rest.API.Mappers;
 
 namespace ROA.Rest.API.Controllers;

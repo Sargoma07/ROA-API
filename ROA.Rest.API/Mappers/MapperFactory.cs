@@ -1,4 +1,6 @@
-﻿namespace ROA.Rest.API.Mappers
+﻿using ROA.Infrastructure.Mapper;
+
+namespace ROA.Rest.API.Mappers
 {
     public interface IMapperFactory
     {
