@@ -3,6 +3,8 @@
     format = "logfmt"
 }
 
+// ---  ROA API   ---
+
 discovery.docker "roa_api" {
     host = "tcp://host.docker.internal:2375"
     filter {
@@ -15,10 +17,10 @@ loki.source.docker "roa_api" {
     host       = "tcp://host.docker.internal:2375"
     targets    = discovery.docker.roa_api.targets
     labels     = {"source" = "docker"}
-    forward_to = [loki.process.format.receiver]
+    forward_to = [loki.process.roa_api_format.receiver]
 }
 
-loki.process "format" {
+loki.process "roa_api_format" {
     forward_to = [loki.relabel.info.receiver]
   
     stage.json {
@@ -67,6 +69,77 @@ loki.relabel "info" {
     }
 }
 
+// ---  ROA API   ---
+
+// ---  Nginx   ---
+
+discovery.docker "nginx" {
+    host = "tcp://host.docker.internal:2375"
+    filter {
+        name = "label"
+        values = ["app.roa.nginx"]
+    }
+}
+
+loki.source.docker "nginx" {
+    host       = "tcp://host.docker.internal:2375"
+    targets    = discovery.docker.nginx.targets
+    labels     = {"source" = "docker", "app" = "nginx"}
+    forward_to = [loki.process.nginx_format.receiver]
+}
+
+loki.process "nginx_format" {
+    forward_to = [loki.relabel.nginx.receiver]
+    
+     stage.json {
+            expressions = {
+                time = "time_iso8601", 
+                statusCode = "status",
+                requestPath = "request_uri",
+                method = "request_method",
+                requestId = "request_id",
+            }
+        }
+      
+        stage.timestamp {
+            source = "time"
+            format = "RFC3339"
+        }
+    
+        stage.labels {
+            values = { 
+                time = "", 
+                statusCode = "",
+                requestPath = "",
+                method = "",
+                requestId = "",
+            }
+        }
+}
+
+loki.relabel "nginx" {
+    forward_to = [loki.write.grafana_loki.receiver]
+
+    rule {
+        action        = "replace"
+        source_labels = ["statusCode"]
+        target_label  = "level"
+        replacement = "Info"
+        regex         = "[234]\\d{2}"
+    }
+    
+    rule {
+        action        = "replace"
+        source_labels = ["statusCode"]
+        target_label  = "level"
+        replacement = "Error"
+        regex         = "[5]\\d{2}"
+    }
+}
+
+// ---  Nginx   ---
+
+// ---  GRAFANA LOKI   ---
 
 loki.write "grafana_loki" {
     endpoint {
@@ -78,3 +151,5 @@ loki.write "grafana_loki" {
         //}
     }
 }
+
+// ---  GRAFANA LOKI   ---
