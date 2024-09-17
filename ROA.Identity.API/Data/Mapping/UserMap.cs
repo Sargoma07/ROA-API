@@ -1,13 +1,13 @@
 using MongoDB.Bson.Serialization;
-using ROA.Rest.API.Domain;
+using ROA.Identity.API.Domain;
 
-namespace ROA.Rest.API.Data.Mapping;
+namespace ROA.Identity.API.Data.Mapping;
 
-public static class PlayerMap
+public static class UserMap
 {
     public static void CreateMap()
     {
-        BsonClassMap.RegisterClassMap<Player>(cm =>
+        BsonClassMap.RegisterClassMap<User>(cm =>
         {
             cm.AutoMap();
             cm.SetIsRootClass(true);

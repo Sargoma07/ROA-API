@@ -15,7 +15,7 @@ namespace ROA.Rest.API.Controllers;
 public class ShopController(
     IDataContextManager dataContextManager,
     IMapperFactory mapperFactory,
-    ILogger<PlayerController> logger)
+    ILogger<ShopController> logger)
     : AbstractController(dataContextManager, mapperFactory, logger)
 {
     private static readonly List<PaymentStatus> AllowToCancelStatuses =
@@ -199,16 +199,17 @@ public class ShopController(
     
     private async Task UpdateAccount(string accountId, decimal amount)
     {
-        var playerRepository = DataContextManager.CreateRepository<IPlayerRepository>();
-        
-        var account = await playerRepository.GetByIdAsync(accountId);
-        
-        if (account is null)
-        {
-            throw new InvalidOperationException($"Incorrect account by {accountId}");
-        }
-        
-        account.AddAmount(amount);
-        playerRepository.AddOrUpdate(account);
+        // var playerRepository = DataContextManager.CreateRepository<IPlayerRepository>();
+        //
+        // var account = await playerRepository.GetByIdAsync(accountId);
+        //
+        // if (account is null)
+        // {
+        //     throw new InvalidOperationException($"Incorrect account by {accountId}");
+        // }
+        //
+        // account.AddAmount(amount);
+        // playerRepository.AddOrUpdate(account);
+        throw new NotImplementedException();
     }
 }

@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROA.Infrastructure.Data;
 using ROA.Inventory.API.Data.Repositories;
@@ -10,6 +11,7 @@ namespace ROA.Inventory.API.Controllers
 {
     [Produces(MediaTypeNames.Application.Json)]
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class InventoryController(
         IDataContextManager dataContextManager,
@@ -17,6 +19,7 @@ namespace ROA.Inventory.API.Controllers
         ILogger<InventoryController> logger)
         : AbstractController(dataContextManager, mapperFactory, logger)
     {
+        // TODO: change player id from jwt  
         [HttpGet("player/{playerId}/inventory")]
         public async Task<ActionResult<InventoryModel>> GetInventory(string playerId)
         {

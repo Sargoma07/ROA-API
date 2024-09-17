@@ -1,17 +1,20 @@
+using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using ROA.Identity.API.Data.Mapping;
+using ROA.Identity.API.Data.Repositories;
+using ROA.Identity.API.Mappers;
+using ROA.Identity.API.Settings;
 using ROA.Infrastructure.Data;
 using ROA.Infrastructure.Data.Mongo;
 using ROA.Infrastructure.Trace.Extensions;
-using ROA.Rest.API.Data.Mapping;
-using ROA.Rest.API.Data.Repositories;
-using ROA.Rest.API.Mappers;
-using ROA.Rest.API.Settings;
 using Serilog;
 
-namespace ROA.Rest.API;
+namespace ROA.Identity.API;
 
 public class Program
 {
@@ -32,6 +35,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
@@ -51,6 +55,8 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddAuthorization();
+
+        ConfigureAuthentication(builder);
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -110,17 +116,47 @@ public class Program
                     });
             });
     }
+    
+    private static void ConfigureAuthentication(WebApplicationBuilder builder)
+    {
+        var settings = builder.Configuration.GetSection("Auth").Get<AuthSettings>();
+
+        if (settings is null)
+        {
+            throw new InvalidOperationException("Auth settings not found");
+        }
+
+        builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,
+                o =>
+                {
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = settings.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = settings.Audience,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = new  SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Secret)),
+                        ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+    }
 
     private static void ConfigureRepositories(IHostApplicationBuilder builder)
     {
         MapperFactory.Configure(builder.Services);
-        
+
         DataContextMap.CreateMaps();
 
         builder.Services.AddSingleton<IDataContext, DataContext>();
 
-        builder.Services.AddSingleton<IPaymentRepository, PaymentRepository>();
-        builder.Services.AddSingleton<IItemPriceRepository, ItemPriceRepository>();
+        builder.Services.AddSingleton<IUserRepository, UserRepository>();
 
         builder.Services.AddScoped<IDataContextManager, DataContextManager>();
     }
@@ -129,5 +165,8 @@ public class Program
     {
         builder.Services.Configure<ConnectionDatabaseSettings>(
             builder.Configuration.GetSection("MongoConnection"));
+        
+        builder.Services.Configure<AuthSettings>(
+            builder.Configuration.GetSection("Auth"));
     }
 }

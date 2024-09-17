@@ -1,6 +1,6 @@
-namespace ROA.Rest.API.Models;
+namespace ROA.Identity.API.Models;
 
-public class PlayerSignUpModel
+public class SignUpModel
 {
     public required string ExternalId { get; set; }
     public required string Provider { get; set; }

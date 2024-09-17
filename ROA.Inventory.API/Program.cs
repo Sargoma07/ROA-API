@@ -1,4 +1,7 @@
+using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -32,6 +35,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
@@ -52,6 +56,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddAuthorization();
 
+        ConfigureAuthentication(builder);
+        
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -109,6 +115,37 @@ public class Program
                             : OtlpExportProtocol.HttpProtobuf;
                     });
             });
+    }
+    
+    private static void ConfigureAuthentication(WebApplicationBuilder builder)
+    {
+        var settings = builder.Configuration.GetSection("Auth").Get<AuthSettings>();
+
+        if (settings is null)
+        {
+            throw new InvalidOperationException("Auth settings not found");
+        }
+
+        builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,
+                o =>
+                {
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = settings.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = settings.Audience,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = new  SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Secret)),
+                        ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
     }
 
     private static void ConfigureRepositories(IHostApplicationBuilder builder)

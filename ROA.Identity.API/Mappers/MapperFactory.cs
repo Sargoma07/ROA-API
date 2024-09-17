@@ -1,6 +1,6 @@
 ﻿using ROA.Infrastructure.Mapper;
 
-namespace ROA.Rest.API.Mappers
+namespace ROA.Identity.API.Mappers
 {
     public interface IMapperFactory
     {
@@ -11,7 +11,7 @@ namespace ROA.Rest.API.Mappers
     {
         public static void Configure(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IPaymentMapper, PaymentMapper>();
+            serviceCollection.AddSingleton<IUserMapper, UserMapper>();
             
             // self-register
             serviceCollection.AddSingleton<IMapperFactory, MapperFactory>();

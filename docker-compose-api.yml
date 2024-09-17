@@ -49,6 +49,25 @@
       - api_data_protection_container:/root/.aspnet/DataProtection-Keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+        
+  roa.identity.api:
+    image: roa.identity.api
+    container_name: "roa.identity.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
+      - "app.roa.api.identity"
+    depends_on:
+      - "roa.db"
+    build:
+      context: .
+      dockerfile: ROA.Identity.API/Dockerfile
+    ports:
+      - "8080"
+    volumes:
+      - api_data_protection_container:/root/.aspnet/DataProtection-Keys
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       
   roa.db.migrations:
     image: roa-db-migrations
@@ -76,6 +95,7 @@
     depends_on:
       - "roa.rest.api"
       - "roa.inventory.api"
+      - "roa.identity.api"
 
 volumes:
   mongodb_data_container:
