@@ -8,8 +8,10 @@ using OpenTelemetry.Trace;
 using ROA.Infrastructure.Data;
 using ROA.Infrastructure.Data.Mongo;
 using ROA.Infrastructure.Trace.Extensions;
+using ROA.Inventory.API.Data;
 using ROA.Inventory.API.Data.Mapping;
 using ROA.Inventory.API.Data.Repositories;
+using ROA.Inventory.API.Filters;
 using ROA.Inventory.API.Mappers;
 using ROA.Inventory.API.Settings;
 using Serilog;
@@ -66,7 +68,10 @@ public class Program
         ConfigureRepositories(builder);
 
         builder.Services
-            .AddControllers()
+            .AddControllers(options =>
+            {
+                options.Filters.Add<UserActionFilter>();
+            })
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -154,6 +159,8 @@ public class Program
 
         DataContextMap.CreateMaps();
 
+        builder.Services.AddScoped<IPlayerContext, PlayerContext>();
+        
         builder.Services.AddSingleton<IDataContext, DataContext>();
 
         builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();

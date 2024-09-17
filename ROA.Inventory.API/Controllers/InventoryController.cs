@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROA.Infrastructure.Data;
+using ROA.Inventory.API.Data;
 using ROA.Inventory.API.Data.Repositories;
 using ROA.Inventory.API.Domain.Types;
 using ROA.Inventory.API.Mappers;
@@ -14,15 +15,18 @@ namespace ROA.Inventory.API.Controllers
     [Authorize]
     [ApiController]
     public class InventoryController(
+        IPlayerContext playerContext,
         IDataContextManager dataContextManager,
         IMapperFactory mapperFactory,
-        ILogger<InventoryController> logger)
+        ILogger<InventoryController> logger
+    )
         : AbstractController(dataContextManager, mapperFactory, logger)
     {
-        // TODO: change player id from jwt  
-        [HttpGet("player/{playerId}/inventory")]
-        public async Task<ActionResult<InventoryModel>> GetInventory(string playerId)
+        [HttpGet("")]
+        public async Task<ActionResult<InventoryModel>> GetInventory()
         {
+            var playerId = playerContext.PlayerId;
+
             var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
             var inventory = await inventoryRepository.GetInventory(playerId);
 
@@ -35,9 +39,11 @@ namespace ROA.Inventory.API.Controllers
             return mapper.MapToDto(inventory);
         }
 
-        [HttpGet("player/{playerId}/storage")]
-        public async Task<ActionResult<InventoryModel>> GetStorage(string playerId)
+        [HttpGet("storage")]
+        public async Task<ActionResult<InventoryModel>> GetStorage()
         {
+            var playerId = playerContext.PlayerId;
+
             var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
             var inventory = await inventoryRepository.GetStorage(playerId);
 
@@ -50,9 +56,11 @@ namespace ROA.Inventory.API.Controllers
             return mapper.MapToDto(inventory);
         }
 
-        [HttpGet("player/{playerId}/equipment")]
-        public async Task<ActionResult<InventoryModel>> GetEquipment(string playerId)
+        [HttpGet("equipment")]
+        public async Task<ActionResult<InventoryModel>> GetEquipment()
         {
+            var playerId = playerContext.PlayerId;
+
             var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
             var inventory = await inventoryRepository.GetEquipment(playerId);
 
@@ -65,10 +73,11 @@ namespace ROA.Inventory.API.Controllers
             return mapper.MapToDto(inventory);
         }
 
-        [HttpPut("player/{playerId}/inventory")]
-        public async Task<ActionResult<InventoryModel>> UpdateInventory(string playerId,
-            [FromBody] InventoryModel request)
+        [HttpPut("")]
+        public async Task<ActionResult<InventoryModel>> UpdateInventory([FromBody] InventoryModel request)
         {
+            var playerId = playerContext.PlayerId;
+
             using var _ = Logger.BeginScope(new Dictionary<string, object> { { "PlayerId", playerId } });
 
             var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
@@ -95,10 +104,11 @@ namespace ROA.Inventory.API.Controllers
             return mapper.MapToDto(inventory);
         }
 
-        [HttpPut("player/{playerId}/storage")]
-        public async Task<ActionResult<InventoryModel>> UpdateStorage(string playerId,
-            [FromBody] InventoryModel request)
+        [HttpPut("storage")]
+        public async Task<ActionResult<InventoryModel>> UpdateStorage([FromBody] InventoryModel request)
         {
+            var playerId = playerContext.PlayerId;
+
             using var _ = Logger.BeginScope(new Dictionary<string, object> { { "PlayerId", playerId } });
 
             var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();
@@ -125,10 +135,11 @@ namespace ROA.Inventory.API.Controllers
             return mapper.MapToDto(inventory);
         }
 
-        [HttpPut("player/{playerId}/equipment")]
-        public async Task<ActionResult<InventoryModel>> UpdateEquipment(string playerId, 
-            [FromBody] InventoryModel request)
+        [HttpPut("equipment")]
+        public async Task<ActionResult<InventoryModel>> UpdateEquipment([FromBody] InventoryModel request)
         {
+            var playerId = playerContext.PlayerId;
+
             using var _ = Logger.BeginScope(new Dictionary<string, object> { { "PlayerId", playerId } });
 
             var inventoryRepository = DataContextManager.CreateRepository<IInventoryRepository>();

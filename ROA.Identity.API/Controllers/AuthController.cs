@@ -136,7 +136,8 @@ public class AuthController(
         var authClaims = new List<Claim>
         {
             new(ClaimTypes.Name, authData.ExternalId),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.Id),
         };
 
         var token = CreateToken(authClaims);
