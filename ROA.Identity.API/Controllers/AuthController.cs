@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using ROA.Domain.Events;
 using ROA.Identity.API.Data.Repositories;
 using ROA.Identity.API.Domain;
 using ROA.Identity.API.Domain.Dtos;
+using ROA.Identity.API.EventBus;
 using ROA.Identity.API.Mappers;
 using ROA.Identity.API.Models;
 using ROA.Identity.API.Settings;
@@ -20,6 +22,7 @@ namespace ROA.Identity.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class AuthController(
+    IUserCreatedProducer userCreatedProducer,
     IOptions<AuthSettings> settings,
     IDataContextManager dataContextManager,
     IMapperFactory mapperFactory,
@@ -45,8 +48,10 @@ public class AuthController(
         userRepository.AddOrUpdate(user);
         await DataContextManager.SaveAsync();
             
-        // TODO: after create a new player should send event to kafka
-        // TODO: where inventory service subscribe on that event and init/create inventory for a new player
+        await userCreatedProducer.ProduceAsync(new UserCreatedEvent()
+        {
+            UserId = user.Id
+        });
 
         var authData = new AuthDataDto()
         {
@@ -80,7 +85,7 @@ public class AuthController(
             throw new InvalidOperationException("Name claim not found");
         }
         
-        _ = Logger.BeginScope(new Dictionary<string, string>() { { "UserExternalId", nameClaim.Value } });
+        using var _ = Logger.BeginScope(new Dictionary<string, string>() { { "UserExternalId", nameClaim.Value } });
 
         var userRepository = DataContextManager.CreateRepository<IUserRepository>();
         var user = await userRepository.GetByExternalId(nameClaim.Value);
@@ -123,7 +128,7 @@ public class AuthController(
     
     private async Task<TokenModel> CreateToken(AuthDataDto authData)
     {
-        _ = Logger.BeginScope(new Dictionary<string, string>() { { "UserExternalId", authData.ExternalId } });
+        using var _ = Logger.BeginScope(new Dictionary<string, string>() { { "UserExternalId", authData.ExternalId } });
 
         var userRepository = DataContextManager.CreateRepository<IUserRepository>();
         var user = await userRepository.GetByExternalId(authData.ExternalId);

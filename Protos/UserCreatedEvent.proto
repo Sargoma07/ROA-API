@@ -1,0 +1,7 @@
+﻿syntax = "proto3";
+
+package ROA.Domain.Events;
+
+message UserCreatedEvent {
+  string UserId = 1;
+}

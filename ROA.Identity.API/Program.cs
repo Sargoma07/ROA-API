@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using Confluent.Kafka.Extensions.OpenTelemetry;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Exporter;
@@ -7,8 +8,10 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using ROA.Identity.API.Data.Mapping;
 using ROA.Identity.API.Data.Repositories;
+using ROA.Identity.API.EventBus;
 using ROA.Identity.API.Mappers;
 using ROA.Identity.API.Settings;
+using ROA.Infrastructure.EventBus.Kafka;
 using ROA.Infrastructure.Data;
 using ROA.Infrastructure.Data.Mongo;
 using ROA.Infrastructure.Trace.Extensions;
@@ -64,6 +67,7 @@ public class Program
 
         ConfigureSettings(builder);
         ConfigureRepositories(builder);
+        ConfigureEventBus(builder);
 
         builder.Services
             .AddControllers()
@@ -107,6 +111,7 @@ public class Program
                     .AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddMongoDbInstrumentation()
+                    .AddConfluentKafkaInstrumentation()
                     .AddOtlpExporter(o =>
                     {
                         o.Endpoint = new Uri(settings.Url);
@@ -168,5 +173,17 @@ public class Program
         
         builder.Services.Configure<AuthSettings>(
             builder.Configuration.GetSection("Auth"));
+        
+        builder.Services.Configure<KafkaSettings>(
+            builder.Configuration.GetSection("Kafka"));
+        
+        builder.Services.Configure<TopicSettings>(
+            builder.Configuration.GetSection("Kafka:Topics"));
+    }
+    
+    private static void ConfigureEventBus(WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<KafkaClientHandle>();
+        builder.Services.AddSingleton<IUserCreatedProducer, UserCreatedProducer>();
     }
 }

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using Confluent.Kafka.Extensions.OpenTelemetry;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Exporter;
@@ -7,10 +8,12 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using ROA.Infrastructure.Data;
 using ROA.Infrastructure.Data.Mongo;
+using ROA.Infrastructure.EventBus.Kafka;
 using ROA.Infrastructure.Trace.Extensions;
 using ROA.Inventory.API.Data;
 using ROA.Inventory.API.Data.Mapping;
 using ROA.Inventory.API.Data.Repositories;
+using ROA.Inventory.API.EventBus;
 using ROA.Inventory.API.Filters;
 using ROA.Inventory.API.Mappers;
 using ROA.Inventory.API.Settings;
@@ -66,6 +69,7 @@ public class Program
 
         ConfigureSettings(builder);
         ConfigureRepositories(builder);
+        ConfigureEventBus(builder);
 
         builder.Services
             .AddControllers(options =>
@@ -112,6 +116,7 @@ public class Program
                     .AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddMongoDbInstrumentation()
+                    .AddConfluentKafkaInstrumentation()
                     .AddOtlpExporter(o =>
                     {
                         o.Endpoint = new Uri(settings.Url);
@@ -165,12 +170,24 @@ public class Program
 
         builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
 
-        builder.Services.AddScoped<IDataContextManager, DataContextManager>();
+        builder.Services.AddSingleton<IDataContextManager, DataContextManager>();
     }
 
     private static void ConfigureSettings(WebApplicationBuilder builder)
     {
         builder.Services.Configure<ConnectionDatabaseSettings>(
             builder.Configuration.GetSection("MongoConnection"));
+        
+        builder.Services.Configure<KafkaSettings>(
+            builder.Configuration.GetSection("Kafka"));
+        
+        builder.Services.Configure<TopicSettings>(
+            builder.Configuration.GetSection("Kafka:Topics"));
+    }
+    
+    private static void ConfigureEventBus(WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<IUserCreatedConsumer, UserCreatedConsumer>();
+        builder.Services.AddHostedService<UserCreatedConsumerService>();
     }
 }
