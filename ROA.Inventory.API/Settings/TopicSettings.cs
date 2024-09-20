@@ -2,5 +2,5 @@
 
 public class TopicSettings
 {
-    public string UserCreatedTopic { get; set; } = string.Empty;
+    public required string UserCreatedTopic { get; set; } 
 }

@@ -10,16 +10,16 @@ using ROA.Infrastructure.Data;
 using ROA.Infrastructure.Data.Mongo;
 using ROA.Infrastructure.EventBus.Kafka;
 using ROA.Infrastructure.Trace.Extensions;
-using ROA.Inventory.API.Data;
-using ROA.Inventory.API.Data.Mapping;
-using ROA.Inventory.API.Data.Repositories;
-using ROA.Inventory.API.EventBus;
-using ROA.Inventory.API.Filters;
-using ROA.Inventory.API.Mappers;
-using ROA.Inventory.API.Settings;
+using ROA.Payment.API.Data;
+using ROA.Payment.API.Data.Mapping;
+using ROA.Payment.API.Data.Repositories;
+using ROA.Payment.API.EventBus;
+using ROA.Payment.API.Filters;
+using ROA.Payment.API.Mappers;
+using ROA.Payment.API.Settings;
 using Serilog;
 
-namespace ROA.Inventory.API;
+namespace ROA.Payment.API;
 
 public class Program
 {
@@ -61,7 +61,7 @@ public class Program
         ConfigureAuthentication(builder);
         
         builder.Services.AddAuthorization();
-        
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -160,14 +160,16 @@ public class Program
     private static void ConfigureRepositories(IHostApplicationBuilder builder)
     {
         MapperFactory.Configure(builder.Services);
-
-        DataContextMap.CreateMaps();
-
-        builder.Services.AddScoped<IPlayerContext, PlayerContext>();
         
+        DataContextMap.CreateMaps();
+        
+        builder.Services.AddScoped<IAccountContext, AccountContext>();
+
         builder.Services.AddSingleton<IDataContext, DataContext>();
 
-        builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
+        builder.Services.AddSingleton<IPaymentRepository, PaymentRepository>();
+        builder.Services.AddSingleton<IItemPriceRepository, ItemPriceRepository>();
+        builder.Services.AddSingleton<IAccountRepository, AccountRepository>();
 
         builder.Services.AddScoped<IDataContextManager, DataContextManager>();
     }

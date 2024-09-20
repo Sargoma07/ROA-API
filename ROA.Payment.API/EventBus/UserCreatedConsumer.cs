@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Options;
 using ROA.Domain.Events;
 using ROA.Infrastructure.EventBus.Kafka;
-using ROA.Inventory.API.Settings;
+using ROA.Payment.API.Settings;
 using Null = Confluent.Kafka.Null;
 
-namespace ROA.Inventory.API.EventBus;
+namespace ROA.Payment.API.EventBus;
 
 public class UserCreatedConsumer : KafkaConsumer<Null, UserCreatedEvent>
 {
@@ -16,7 +16,7 @@ public class UserCreatedConsumer : KafkaConsumer<Null, UserCreatedEvent>
     ) :
         base(
             serviceScopeFactory,
-            typeof(UserCreatedConsumeStrategy), 
+            typeof(UserCreatedConsumeStrategy),
             kafkaSettings,
             new KafkaProtobufDeserializer<UserCreatedEvent>(),
             logger

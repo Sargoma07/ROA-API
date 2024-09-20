@@ -10,13 +10,15 @@ public abstract class ConsumerBackgroundService<TKey, TValue>(
     : BackgroundService
 {
     
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task<Task> ExecuteAsync(CancellationToken stoppingToken)
     {
-        await StartConsumerLoop(stoppingToken);
+        return Task.FromResult(Task.Run(async () =>await StartConsumerLoop(stoppingToken), stoppingToken));
     }
 
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
     {
+        logger.LogInformation("Starting consumer background service {name}", GetType().Name);
+
         consumer.Subscribe();
 
         while (!cancellationToken.IsCancellationRequested)
@@ -41,6 +43,8 @@ public abstract class ConsumerBackgroundService<TKey, TValue>(
                 throw;
             }
         }
+        
+        logger.LogInformation("Stopped consumer background service {name}", GetType().Name);
     }
 
     public override void Dispose()

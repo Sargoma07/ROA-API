@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using Confluent.Kafka.Extensions.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -7,17 +8,23 @@ namespace ROA.Infrastructure.EventBus.Kafka;
 
 public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
 {
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly Type _consumerStrategyType;
     private readonly ILogger _logger;
     private readonly Confluent.Kafka.IConsumer<TKey, TValue> _kafkaConsumer;
 
     protected string Topic { get; init; } = string.Empty;
 
     protected KafkaConsumer(
+        IServiceScopeFactory serviceScopeFactory,
+        Type consumerStrategyType,
         IOptions<KafkaSettings> settings,
         IDeserializer<TValue> deserializer,
         ILogger logger
     )
     {
+        _serviceScopeFactory = serviceScopeFactory;
+        _consumerStrategyType = consumerStrategyType;
         _logger = logger;
         var consumerSettings = settings.Value.Consumer;
 
@@ -70,7 +77,16 @@ public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
             using var _ = _logger.BeginScope(new Dictionary<string, string> { { "Offset", result.Offset.ToString() } });
 
             _logger.LogInformation("Starting to consume topic: {Topic}", Topic);
-            var consumeResult = await ConsumeProcessAsync(result, cancellationToken);
+            using var scope = _serviceScopeFactory.CreateScope();
+
+            if (scope.ServiceProvider.GetRequiredService(_consumerStrategyType) is not
+                IConsumeStrategy<TKey, TValue> strategy)
+            {
+                throw new InvalidOperationException($"Invalid strategy for {GetType().Name}");
+            }
+
+            var consumeResult = await strategy.ConsumeProcessAsync(result, cancellationToken);
+
             _logger.LogInformation("Executed consuming of topic: {Topic}", Topic);
 
             return consumeResult;
@@ -81,11 +97,5 @@ public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
         }
 
         return result;
-    }
-
-    protected virtual Task<ConsumeResult<TKey, TValue>> ConsumeProcessAsync(ConsumeResult<TKey, TValue> result,
-        CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

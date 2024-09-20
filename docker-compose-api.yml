@@ -12,22 +12,23 @@
     volumes:
       - mongodb_data_container:/data/db
   
-  roa.rest.api:
-    image: roa.rest.api
-    container_name: "roa.rest.api"
+  roa.payment.api:
+    image: roa.payment.api
+    container_name: "roa.payment.api"
     labels:
       - "app.roa"
       - "app.roa.api"
-      - "app.roa.api.rest"
+      - "app.roa.api.payment"
     depends_on:
       - "roa.db"
+      - "kafka"
     build:
       context: .
-      dockerfile: ROA.Rest.API/Dockerfile
+      dockerfile: ROA.Payment.API/Dockerfile
     ports:
       - "8080"
     volumes:
-      - api_data_protection_container:/root/.aspnet/DataProtection-Keys
+      - payment_api_data_protection_container:/root/.aspnet/DataProtection-Keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
   
@@ -47,7 +48,7 @@
     ports:
       - "8080"
     volumes:
-      - api_data_protection_container:/root/.aspnet/DataProtection-Keys
+      - inventory_api_data_protection_container:/root/.aspnet/DataProtection-Keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
         
@@ -67,7 +68,7 @@
     ports:
       - "8080"
     volumes:
-      - api_data_protection_container:/root/.aspnet/DataProtection-Keys
+      - identity_api_data_protection_container:/root/.aspnet/DataProtection-Keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       
@@ -80,7 +81,7 @@
       - "roa.db"
     build:
       context: .
-      dockerfile: Roa.Data.Migrations/Dockerfile
+      dockerfile: ROA.Data.Migrations/Dockerfile
       
   nginx:
     image: nginx:latest
@@ -95,7 +96,7 @@
       - "5000:80"
       - "5001:443"
     depends_on:
-      - "roa.rest.api"
+      - "roa.payment.api"
       - "roa.inventory.api"
       - "roa.identity.api"
   
@@ -137,5 +138,7 @@
 
 volumes:
   mongodb_data_container:
-  api_data_protection_container:
+  payment_api_data_protection_container:
+  inventory_api_data_protection_container:
+  identity_api_data_protection_container:
     
