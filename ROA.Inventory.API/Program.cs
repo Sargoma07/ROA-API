@@ -186,6 +186,8 @@ public class Program
     
     private static void ConfigureEventBus(WebApplicationBuilder builder)
     {
+        builder.Services.AddSingleton<KafkaClientHandle>();
+        
         builder.Services.AddHostedService<UserCreatedConsumerService>();
         builder.Services.AddSingleton<UserCreatedConsumer>();
         builder.Services.AddScoped<UserCreatedConsumeStrategy>();

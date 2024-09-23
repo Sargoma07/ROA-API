@@ -23,5 +23,6 @@ public class UserCreatedConsumer : KafkaConsumer<Null, UserCreatedEvent>
         )
     {
         Topic = settings.Value.UserCreatedTopic;
+        ErrorTopic = settings.Value.UserCreatedTopicError;
     }
 }

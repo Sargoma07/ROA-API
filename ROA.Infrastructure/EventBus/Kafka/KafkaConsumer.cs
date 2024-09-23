@@ -1,12 +1,13 @@
 ﻿using Confluent.Kafka;
 using Confluent.Kafka.Extensions.Diagnostics;
+using Google.Protobuf;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ROA.Infrastructure.EventBus.Kafka;
 
-public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
+public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>  where TValue : IMessage
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly Type _consumerStrategyType;
@@ -14,6 +15,9 @@ public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
     private readonly Confluent.Kafka.IConsumer<TKey, TValue> _kafkaConsumer;
 
     protected string Topic { get; init; } = string.Empty;
+    
+    protected string ErrorTopic { get; init; } = string.Empty;
+
 
     protected KafkaConsumer(
         IServiceScopeFactory serviceScopeFactory,
@@ -73,11 +77,12 @@ public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
         }
 
         using var _ = _logger.BeginScope(new Dictionary<string, string> { { "Offset", result.Offset.ToString() } });
-        
+
+        using var scope = _serviceScopeFactory.CreateScope();
+
         try
         {
             _logger.LogInformation("Starting to consume topic: {Topic}", Topic);
-            using var scope = _serviceScopeFactory.CreateScope();
 
             if (scope.ServiceProvider.GetRequiredService(_consumerStrategyType) is not
                 IConsumeStrategy<TKey, TValue> strategy)
@@ -94,8 +99,31 @@ public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
         catch (Exception e)
         {
             _logger.LogError(e, "Unhandled exception");
+
+            await ProduceUnhandledMessageToErrorTopic(scope, result, e);
         }
+        
 
         return result;
+    }
+
+    private async Task ProduceUnhandledMessageToErrorTopic(IServiceScope scope, ConsumeResult<TKey, TValue> result, Exception e)
+    {
+        var kafkaClientHandle = scope.ServiceProvider.GetRequiredService<KafkaClientHandle>();
+        ISerializer<TValue> serializer = new KafkaProtobufSerializer<TValue>();
+        var producer = new ErrorKafkaProducer<TKey, TValue>(ErrorTopic, kafkaClientHandle, serializer);
+        
+        await producer.ProduceAsync(result.Message.Key, result.Message.Value, new Dictionary<string, string>
+        {
+            {
+                "source_offset", result.Offset.ToString()
+            },
+            {
+                "error_message", e.Message
+            },
+            {
+                "error_type", e.GetType().ToString()
+            }
+        });
     }
 }

@@ -1,4 +1,5 @@
-﻿using Confluent.Kafka;
+﻿using System.Text;
+using Confluent.Kafka;
 using Confluent.Kafka.Extensions.Diagnostics;
 
 namespace ROA.Infrastructure.EventBus.Kafka;
@@ -15,6 +16,15 @@ public abstract class KafkaProducer<TKey, TValue> : IProducer<TKey, TValue>
     }
 
     protected string Topic { get; init; } = string.Empty;
+
+    public async Task<DeliveryResult<TKey, TValue>> ProduceAsync(TKey key, TValue message,
+        IDictionary<string, string> headers)
+    {
+        return await ProduceAsync(new Message<TKey, TValue>
+        {
+            Key = key, Value = message, Headers = ConvertDictionaryToHeaders(headers)
+        });
+    }
 
 
     public async Task<DeliveryResult<TKey, TValue>> ProduceAsync(TKey key, TValue message)
@@ -50,5 +60,17 @@ public abstract class KafkaProducer<TKey, TValue> : IProducer<TKey, TValue>
     private async Task<DeliveryResult<TKey, TValue>> ProduceAsync(Message<TKey, TValue> message)
     {
         return await _kafkaProducer.ProduceAsync(Topic, message);
+    }
+    
+    private static Headers ConvertDictionaryToHeaders(IDictionary<string, string> collection)
+    {
+        var headers = new Headers();
+
+        foreach (var (headerKey, value) in collection)
+        {
+            headers.Add(new Header(headerKey, Encoding.UTF8.GetBytes(value)));
+        }
+
+        return headers;
     }
 }
