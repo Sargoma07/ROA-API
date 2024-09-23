@@ -67,15 +67,15 @@ public abstract class KafkaConsumer<TKey, TValue> : IConsumer<TKey, TValue>
     private async Task<ConsumeResult<TKey, TValue>?> HandleConsumeProcessAsync(ConsumeResult<TKey, TValue>? result,
         CancellationToken cancellationToken)
     {
+        if (result is null)
+        {
+            throw new InvalidOperationException($"Result of consuming of topic {Topic} is null");
+        }
+
+        using var _ = _logger.BeginScope(new Dictionary<string, string> { { "Offset", result.Offset.ToString() } });
+        
         try
         {
-            if (result is null)
-            {
-                throw new InvalidOperationException($"Result of consuming of topic {Topic} is null");
-            }
-
-            using var _ = _logger.BeginScope(new Dictionary<string, string> { { "Offset", result.Offset.ToString() } });
-
             _logger.LogInformation("Starting to consume topic: {Topic}", Topic);
             using var scope = _serviceScopeFactory.CreateScope();
 
