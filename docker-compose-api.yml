@@ -71,6 +71,26 @@
       - identity_api_data_protection_container:/root/.aspnet/DataProtection-Keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+        
+  roa.shop.api:
+    image: roa.shop.api
+    container_name: "roa.shop.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
+      - "app.roa.api.shop"
+    depends_on:
+      - "roa.db"
+      - "kafka"
+    build:
+      context: .
+      dockerfile: ROA.Shop.API/Dockerfile
+    ports:
+      - "8080"
+    volumes:
+      - shop_api_data_protection_container:/root/.aspnet/DataProtection-Keys
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       
   roa.db.migrations:
     image: roa-db-migrations
@@ -99,6 +119,7 @@
       - "roa.payment.api"
       - "roa.inventory.api"
       - "roa.identity.api"
+      - "roa.shop.api"
   
   kafka:
     image: apache/kafka:latest
@@ -141,4 +162,4 @@ volumes:
   payment_api_data_protection_container:
   inventory_api_data_protection_container:
   identity_api_data_protection_container:
-    
+  shop_api_data_protection_container:

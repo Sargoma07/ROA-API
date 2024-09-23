@@ -8,9 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.8" />
-        <PackageReference Include="Refit.HttpClientFactory" Version="7.2.1" />
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
         <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="1.5.0" />
@@ -27,11 +24,8 @@
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
+        <DependentUpon>Dockerfile</DependentUpon>
       </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Domain\Events\" />
     </ItemGroup>
 
 </Project>

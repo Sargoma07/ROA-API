@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Serializers;
 
-namespace ROA.Payment.API.Data.Mapping;
+namespace ROA.Shop.API.Data.Mapping;
 
 public class DataContextMap
 {
@@ -18,7 +18,7 @@ public class DataContextMap
         }
 
         var objectSerializer = new ObjectSerializer(type => ObjectSerializer.DefaultAllowedTypes(type)
-                                                            || type.FullName.StartsWith("ROA.Payment.API.Domain"));
+                                                            || type.FullName.StartsWith("ROA.Shop.API.Domain"));
         BsonSerializer.RegisterSerializer(objectSerializer);
 
         BsonSerializer.RegisterIdGenerator(typeof(string), StringObjectIdGenerator.Instance);
@@ -38,7 +38,6 @@ public class DataContextMap
 
     private static void CreateModelMap()
     {
-        PaymentMap.CreateMap();
-        AccountMap.CreateMap();
+        ItemPriceMap.CreateMap();
     }
 }

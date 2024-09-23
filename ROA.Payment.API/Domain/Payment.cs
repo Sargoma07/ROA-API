@@ -29,9 +29,10 @@ public class Payment : IEntity
 
     public record OrderLine
     {
+        public required string Name { get; set; }
         public int Count { get; set; }
-        public required string DataSpec { get; set; }
         public decimal PricePerUnit { get; set; }
+        public required string Currency { get; set; }
     }
 
     public record PaymentAmountDetails

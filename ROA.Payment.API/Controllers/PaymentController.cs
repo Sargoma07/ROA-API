@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using ROA.Infrastructure.Data;
 using ROA.Payment.API.Data;
 using ROA.Payment.API.Data.Repositories;
+using ROA.Payment.API.Domain;
 using ROA.Payment.API.Domain.Statuses;
 using ROA.Payment.API.Mappers;
 using ROA.Payment.API.Models;
+using ROA.Payment.API.ServiceAPI.ShopService;
 
 namespace ROA.Payment.API.Controllers;
 
@@ -15,6 +17,7 @@ namespace ROA.Payment.API.Controllers;
 [Authorize]
 [ApiController]
 public class PaymentController(
+    IShopServiceApi shopServiceApi,
     IAccountContext accountContext,
     IDataContextManager dataContextManager,
     IMapperFactory mapperFactory,
@@ -26,14 +29,14 @@ public class PaymentController(
 
     private static readonly List<PaymentStatus> AllowToExecuteStatuses =
         [PaymentStatus.Completed, PaymentStatus.Processing];
-    
+
     private static string ShopId => "Shop";
 
     [HttpGet("{paymentId}")]
     public async Task<ActionResult<PaymentModel>> GetPayment(string paymentId)
     {
         var accountId = accountContext.AccountId;
-        
+
         var paymentRepository = DataContextManager.CreateRepository<IPaymentRepository>();
         var payment = await paymentRepository.GetPaymentByAccount(paymentId, accountId);
 
@@ -64,7 +67,7 @@ public class PaymentController(
         var payment = mapper.MapFromDto(request);
         payment.Status = PaymentStatus.Processing;
         payment.AccountId = accountId;
-        
+
         await CalculatePrice(payment);
 
         paymentRepository.AddOrUpdate(payment);
@@ -78,7 +81,7 @@ public class PaymentController(
     public async Task<ActionResult<PaymentModel>> UpdatePayment(string paymentId, [FromBody] PaymentModel request)
     {
         var accountId = accountContext.AccountId;
-        
+
         using var _ = Logger.BeginScope(new Dictionary<string, object>
         {
             { "AccountId", accountId },
@@ -98,7 +101,7 @@ public class PaymentController(
 
         payment = mapper.MapFromDto(request, destination: payment);
         payment.Status = PaymentStatus.Processing;
-        
+
         await CalculatePrice(payment);
 
         paymentRepository.AddOrUpdate(payment);
@@ -140,6 +143,7 @@ public class PaymentController(
         {
             payment.Status = PaymentStatus.Completed;
             payment.AmountDetails.Amount = payment.TotalDetails.Total;
+            payment.AmountDetails.Currency = payment.TotalDetails.Currency;
 
             paymentRepository.AddOrUpdate(payment);
 
@@ -157,7 +161,8 @@ public class PaymentController(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Unhandled exception");
+            logger.LogError(ex, "Unhandled exception");
+            return Problem("Unhandled error");
         }
         finally
         {
@@ -173,7 +178,7 @@ public class PaymentController(
     public async Task<ActionResult<PaymentModel>> CancelPayment(string paymentId)
     {
         var accountId = accountContext.AccountId;
-        
+
         var paymentRepository = DataContextManager.CreateRepository<IPaymentRepository>();
         var payment = await paymentRepository.GetPaymentByAccount(paymentId, accountId);
 
@@ -206,30 +211,39 @@ public class PaymentController(
 
     private async Task CalculatePrice(Domain.Payment payment)
     {
-        var itemPriceRepository = DataContextManager.CreateRepository<IItemPriceRepository>();
-        var itemPrice = await itemPriceRepository.GetPriceList();
+        // TODO: rework Currency
+        payment.TotalDetails.Currency = CurrencyCode.GameGold;
+        
+        var uniqueNames = payment.Order.Lines.Select(x => x.Name).Distinct();
+        var itemPrices = await shopServiceApi.GetPrices(payment.TotalDetails.Currency, uniqueNames);
 
         foreach (var orderLine in payment.Order.Lines)
         {
-            orderLine.PricePerUnit =
-                itemPrice.PriceDetails.FirstOrDefault(x => x.DataSpec == orderLine.DataSpec)?.Price
-                ?? 0;
+            var itemPrice = itemPrices.FirstOrDefault(x => x.UniqueName == orderLine.Name);
+
+            if (itemPrice is null)
+            {
+                continue;
+            }
+
+            orderLine.PricePerUnit = itemPrice.Price;
+            orderLine.Name = itemPrice.Currency;
         }
 
         payment.TotalDetails.Total = payment.Order.Lines.Sum(x => x.PricePerUnit * x.Count);
     }
-    
+
     private async Task UpdateAccount(string accountId, string currency, decimal amount)
     {
         var accountRepository = DataContextManager.CreateRepository<IAccountRepository>();
-        
+
         var account = await accountRepository.GetByIdAsync(accountId);
-        
+
         if (account is null)
         {
             throw new InvalidOperationException($"Incorrect account by {accountId}");
         }
-        
+
         account.AddAmount(currency, amount);
         accountRepository.AddOrUpdate(account);
     }

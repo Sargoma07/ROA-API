@@ -4,7 +4,7 @@ namespace ROA.Infrastructure.Data.Mongo.Extensions;
 
 public static class EnumerableExtension
 {
-    internal static IEnumerable<TEntity> LoadToContext<TEntity>(this IEnumerable<TEntity> entities,
+    public static IEnumerable<TEntity> LoadToContext<TEntity>(this IEnumerable<TEntity> entities,
         IDataContext context)
         where TEntity : IEntity
     {
@@ -39,7 +39,7 @@ public static class EnumerableExtension
         return result;
     }
 
-    internal static TEntity LoadToContext<TEntity>(this TEntity source,
+    public static TEntity LoadToContext<TEntity>(this TEntity source,
         IDataContext context)
         where TEntity : IEntity
     {

@@ -1,7 +1,7 @@
 using MongoDB.Bson.Serialization;
-using ROA.Payment.API.Domain;
+using ROA.Shop.API.Domain;
 
-namespace ROA.Payment.API.Data.Mapping;
+namespace ROA.Shop.API.Data.Mapping;
 
 public static class ItemPriceMap
 {

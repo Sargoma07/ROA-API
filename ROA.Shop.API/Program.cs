@@ -1,31 +1,21 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Confluent.Kafka.Extensions.OpenTelemetry;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Polly;
-using Polly.CircuitBreaker;
-using Polly.Retry;
-using Refit;
 using ROA.Infrastructure.Data;
 using ROA.Infrastructure.Data.Mongo;
 using ROA.Infrastructure.EventBus.Kafka;
 using ROA.Infrastructure.Trace.Extensions;
-using ROA.Payment.API.Data;
-using ROA.Payment.API.Data.Mapping;
-using ROA.Payment.API.Data.Repositories;
-using ROA.Payment.API.EventBus;
-using ROA.Payment.API.Filters;
-using ROA.Payment.API.Mappers;
-using ROA.Payment.API.ServiceAPI.ShopService;
 using ROA.Payment.API.Settings;
+using ROA.Shop.API.Data.Mapping;
+using ROA.Shop.API.Data.Repositories;
+using ROA.Shop.API.Mappers;
+using ROA.Shop.API.Settings;
 using Serilog;
-using HttpPolicyExtensions = ROA.Infrastructure.Http.HttpPolicyExtensions;
 
-namespace ROA.Payment.API;
+namespace ROA.Shop.API;
 
 public class Program
 {
@@ -46,7 +36,6 @@ public class Program
 
         app.UseHttpsRedirection();
 
-        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
@@ -59,12 +48,10 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         ConfigureLogger();
-
+        
         ConfigureTracing(builder);
 
         builder.Host.UseSerilog();
-
-        ConfigureAuthentication(builder);
 
         builder.Services.AddAuthorization();
 
@@ -72,13 +59,12 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        ConfigureExternalApi(builder);
         ConfigureSettings(builder);
         ConfigureRepositories(builder);
         ConfigureEventBus(builder);
 
         builder.Services
-            .AddControllers(options => { options.Filters.Add<UserActionFilter>(); })
+            .AddControllers()
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -86,33 +72,6 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         return builder;
-    }
-
-    private static void ConfigureExternalApi(WebApplicationBuilder builder)
-    {
-        var shopApiSettings = builder.Configuration.GetSection("ShopService").Get<ShopApiSettings>();
-
-        if (shopApiSettings is null)
-        {
-            throw new InvalidOperationException($"{nameof(ShopApiSettings)} settings not found");
-        }
-
-        builder.Services.AddRefitClient<IShopServiceApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(shopApiSettings.BaseAddress))
-            .AddPolicyHandler(GetRetryPolicy())
-            .AddPolicyHandler(GetCircuitBreakerPolicy());
-    }
-
-    private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
-    {
-        return HttpPolicyExtensions.CreateHandleHttpErrorBuilder()
-            .WaitAndRetryAsync(5, HttpPolicyExtensions.CreteExponentialPolicy());
-    }
-
-    private static AsyncCircuitBreakerPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
-    {
-        return HttpPolicyExtensions.CreateHandleHttpErrorBuilder()
-            .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
     }
 
     private static void ConfigureLogger()
@@ -156,50 +115,17 @@ public class Program
                     });
             });
     }
-
-    private static void ConfigureAuthentication(WebApplicationBuilder builder)
-    {
-        var settings = builder.Configuration.GetSection("Auth").Get<AuthSettings>();
-
-        if (settings is null)
-        {
-            throw new InvalidOperationException("Auth settings not found");
-        }
-
-        builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,
-                o =>
-                {
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = settings.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = settings.Audience,
-                        ValidateLifetime = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Secret)),
-                        ValidateIssuerSigningKey = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
-    }
+    
 
     private static void ConfigureRepositories(IHostApplicationBuilder builder)
     {
         MapperFactory.Configure(builder.Services);
-
+        
         DataContextMap.CreateMaps();
-
-        builder.Services.AddScoped<IAccountContext, AccountContext>();
-
+        
         builder.Services.AddSingleton<IDataContext, DataContext>();
 
-        builder.Services.AddSingleton<IPaymentRepository, PaymentRepository>();
-        builder.Services.AddSingleton<IAccountRepository, AccountRepository>();
+        builder.Services.AddSingleton<IItemPriceRepository, ItemPriceRepository>();
 
         builder.Services.AddScoped<IDataContextManager, DataContextManager>();
     }
@@ -208,18 +134,16 @@ public class Program
     {
         builder.Services.Configure<ConnectionDatabaseSettings>(
             builder.Configuration.GetSection("MongoConnection"));
-
+        
         builder.Services.Configure<KafkaSettings>(
             builder.Configuration.GetSection("Kafka"));
-
+        
         builder.Services.Configure<TopicSettings>(
             builder.Configuration.GetSection("Kafka:Topics"));
     }
-
+    
     private static void ConfigureEventBus(WebApplicationBuilder builder)
     {
-        builder.Services.AddHostedService<UserCreatedConsumerService>();
-        builder.Services.AddSingleton<UserCreatedConsumer>();
-        builder.Services.AddScoped<UserCreatedConsumeStrategy>();
+        // configure event bus
     }
 }
