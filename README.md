@@ -2,15 +2,32 @@
 
 It's a WEB API project for ROA game.
 
+![[architecture]](./Attachments/architecture.jpg)
+
 # Startup
 ```bash
 docker-compose -f docker-compose-api.yml docker-compose-grafana.yml -p roa-api up -d
 ```
 
 # Components
-- API
-  - roa.identity.api - identity service
-  - roa.inventory.api - inventory service
+- .Net C#
+  - App
+    - API
+      - roa.identity.api - identity service
+      - roa.inventory.api - inventory service
+      - roa.payment.api - service that handles payment
+      - roa.shop.api - shop service
+    - Utilities
+      - roa.data.migrations - database migrations
+  - Libs
+    - Serilog - logging
+    - OpenTelemetry - tracing
+    - MongoDB.Driver - database
+    - Confluent.Kafka - event bus
+    - Google.Protobuf - to serialize/deserialize binary format
+    - AutoMapper - mapping
+    - Refit - http client for REST api
+    - Polly - to provide resilience strategies such as Retry, Circuit Breaker, Hedging, Timeout, Rate Limiter and Fallback
 - DB 
   - Mongo  
 - Grafana
