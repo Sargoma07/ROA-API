@@ -4,6 +4,7 @@ It's a WEB API project for ROA game.
 
 ![[architecture]](./Attachments/architecture.jpg)
 
+
 # Startup
 ```bash
 docker-compose -f docker-compose-api.yml docker-compose-grafana.yml -p roa-api up -d
@@ -45,3 +46,12 @@ Command to generate class from proto:
 ```bash
 protoc  --csharp_out=./ROA.Identity.API/Domain/Events ./Protos/UserCreatedEvent.proto
 ```
+
+## Grafana
+Tracing and logs related together with traceId. You can see result of collected data in [Grafana](http://localhost:3000).
+
+### Tempo
+![[tracing]](./Attachments/tracing.jpg)
+
+### Loki
+![[logs]](./Attachments/logs.jpg)
