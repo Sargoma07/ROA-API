@@ -1,19 +1,21 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDBMigrations;
+using Version = MongoDBMigrations.Version;
 
 namespace ROA.Data.Migrations.Versions;
 
-public class Version101 : IMigration
+public class Version101 : Migration
 {
-    public MongoDBMigrations.Version Version => new(1, 0, 1);
-
-    public string Name => "Version 1.0.1";
+    public Version101()
+    {
+        Version = new Version(1, 0, 1);
+        Name = "Version 1.0.1";
+    }
 
     private const string ETagField = "ETag";
     
     private const string IdField = "_id";
-    private const string PlayerId = "632468860d43ec833dcbb83e";
+    private const string UserId = "632468860d43ec833dcbb83e";
 
     private const string InventoryId = "632468860d43ec833dcbb831";
     private const string StorageId = "632468860d43ec833dcbb832";
@@ -25,36 +27,61 @@ public class Version101 : IMigration
     private const string TestGoldSpec =
         "/Script/Engine.BlueprintGeneratedClass'/Game/Gameplay/Inventory/InventoryItemData/BP_GoldInventoryData.BP_GoldInventoryData_C'";
 
+    private const string GameGoldCurrency = "GAME_GOLD";
 
-    public void Up(IMongoDatabase database)
+
+    protected override void UpExecute(IMongoDatabase database)
     {
-        Console.WriteLine("Updating collections");
-
-        UpPlayer(database);
+        UpUser(database);
+        
+        UpAccount(database);
 
         UpInventory(database);
-
-        Console.WriteLine("Migration completed");
     }
 
-    private static void UpPlayer(IMongoDatabase database)
+    private static void UpUser(IMongoDatabase database)
     {
-        var playerCollection = database.GetCollection<BsonDocument>("Player");
+        var collection = database.GetCollection<BsonDocument>("User");
 
-        var playerDocument = new BsonDocument()
+        var document = new BsonDocument
         {
-            { IdField, PlayerId },
-            {ETagField, Guid.NewGuid()},
-            { "_t", "Player" },
+            { IdField, UserId },
+            { ETagField, Guid.NewGuid() },
+            { "_t", "User" },
             { "ExternalId", "TestPlayerId" },
             { "Provider", "Local" }
         };
-        playerCollection.InsertOne(playerDocument);
+
+        collection.InsertOne(document);
+    }
+
+    private void UpAccount(IMongoDatabase database)
+    {
+        var collection = database.GetCollection<BsonDocument>("Account");
+
+        var document = new BsonDocument
+        {
+            { IdField, UserId },
+            { ETagField, Guid.NewGuid() },
+            { "_t", "Account" },
+            {
+                "Balances", new BsonArray
+                {
+                    new BsonDocument
+                    {
+                        { "Currency", GameGoldCurrency },
+                        { "Amount", 0.0m }
+                    }
+                }
+            }
+        };
+        
+        collection.InsertOne(document);
     }
 
     private static void UpInventory(IMongoDatabase database)
     {
-        var inventoryCollection = database.GetCollection<BsonDocument>("Inventory");
+        var collection = database.GetCollection<BsonDocument>("Inventory");
 
         var slots = GenerateEmptySlots(40).ToList();
         slots[0] = CreateInventoryDocument("0", ArmorSpec, 1);
@@ -65,57 +92,56 @@ public class Version101 : IMigration
             { IdField, InventoryId },
             {ETagField, Guid.NewGuid()},
             { "_t", "Inventory" },
-            { "PlayerId", PlayerId },
+            { "PlayerId", UserId },
             { "Type", "CharacterInventory" },
             {
                 "Slots", new BsonArray(slots)
             }
         };
 
-        inventoryCollection.InsertOne(inventoryDocument);
+        collection.InsertOne(inventoryDocument);
         
         var storageDocument = new BsonDocument()
         {
             { IdField, StorageId },
             {ETagField, Guid.NewGuid()},
             { "_t", "Inventory" },
-            { "PlayerId", PlayerId },
+            { "PlayerId", UserId },
             { "Type", "Storage" },
             {
                 "Slots", new BsonArray(GenerateEmptySlots(72))
             }
         };
 
-        inventoryCollection.InsertOne(storageDocument);
+        collection.InsertOne(storageDocument);
         
         var equipmentDocument = new BsonDocument()
         {
             { IdField, EquipmentId },
             {ETagField, Guid.NewGuid()},
             { "_t", "Inventory" },
-            { "PlayerId", PlayerId },
+            { "PlayerId", UserId },
             { "Type", "Equipment" },
             {
                 "Slots", new BsonArray()
             }
         };
 
-        inventoryCollection.InsertOne(equipmentDocument);
+        collection.InsertOne(equipmentDocument);
     }
 
-    public void Down(IMongoDatabase database)
+    protected override void DownExecute(IMongoDatabase database)
     {
-        Console.WriteLine("Updating collections");
-
-        var playerCollection = database.GetCollection<BsonDocument>("Player");
-        playerCollection.DeleteOne(x => x[IdField] == PlayerId);
+        var userCollection = database.GetCollection<BsonDocument>("User");
+        userCollection.DeleteOne(x => x[IdField] == UserId);
+        
+        var accountCollection = database.GetCollection<BsonDocument>("Account");
+        accountCollection.DeleteOne(x => x[IdField] == UserId);
         
         var inventoryCollection = database.GetCollection<BsonDocument>("Inventory");
         inventoryCollection.DeleteOne(x => x[IdField] == InventoryId);
         inventoryCollection.DeleteOne(x => x[IdField] == StorageId);
         inventoryCollection.DeleteOne(x => x[IdField] == EquipmentId);
-
-        Console.WriteLine("Migration completed");
     }
 
     private static IEnumerable<BsonDocument> GenerateEmptySlots(int count)
