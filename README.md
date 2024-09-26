@@ -9,6 +9,9 @@ It's a WEB API project for ROA game.
 ```bash
 docker-compose -f docker-compose-api.yml docker-compose-grafana.yml -p roa-api up -d
 ```
+## Tests  
+### Postman 
+You can import postman collection in Postman from /tests/postman.
 
 # Components
 - .Net C#

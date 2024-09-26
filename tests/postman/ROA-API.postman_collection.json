@@ -1,0 +1,1051 @@
+{
+	"info": {
+		"_postman_id": "13caba31-78fc-4c5f-8dda-8dd79bc94310",
+		"name": "ROA-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3953179"
+	},
+	"item": [
+		{
+			"name": "Identity Service",
+			"item": [
+				{
+					"name": "SignUp",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - access, refresh\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('access');\r",
+									"    pm.expect(responseData).to.have.property('refresh');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"externalId\": \"{{externalUserId}}\",\r\n    \"provider\": \"Local\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/auth/signup",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "### Signup User\n\nThis endpoint allows you to create a new user account.\n\n**Request Body**\n\n- `externalId` (string): The external ID of the user.\n    \n- `provider` (string, optional): The provider of the user account.\n    \n\n**Response**\n\n**Ok**\n\n- access (string): JWT\n    \n- refresh (string): Token to refresh access token\n    \n\n``` json\n{\n    \"access\": \"string\",\n    \"refresh\": \"string\"\n}\n\n ```\n\n**Error**\n\n``` json\n{\n    \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.1\",\n    \"title\": \"Bad Request\",\n    \"status\": 400,\n    \"traceId\": \"00-96c3f4e72bc05e2597f1e8e7b0c01332-d20c18aa1f6e8783-01\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "SignIn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - access, refresh\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('access');\r",
+									"    pm.expect(responseData).to.have.property('refresh');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"externalId\": \"{{externalUserId}}\",\r\n    \"provider\": \"Local\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/auth/signin",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signin"
+							]
+						},
+						"description": "### Sign In\n\nThis endpoint is used to sign in with external authentication provider.\n\n#### Request Body\n\n- `externalId` (string, required): The external ID for authentication.\n    \n- `provider` (string, required): The authentication provider.\n    \n\n#### Response\n\n- Status: 200\n    \n- Content-Type: application/json\n    \n- `access` (string): The access token for authentication.\n    \n- `refresh` (string): The refresh token for authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - access, refresh\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('access');\r",
+									"    pm.expect(responseData).to.have.property('refresh');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"access\": \"{{accessToken}}\",\r\n    \"refresh\": \"{{refreshToken}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/auth/refreshToken",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refreshToken"
+							]
+						},
+						"description": "### Refresh Token\n\nThis endpoint is used to refresh the access token by providing the refresh token.\n\n#### Request Body\n\n- `access` (string, required): The access token.\n    \n- `refresh` (string, required): The refresh token.\n    \n\n#### Response\n\n- Status: 200\n    \n- Content-Type: application/json\n    \n- `access` (string): The access token for authentication.\n    \n- `refresh` (string): The refresh token for authentication."
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"function parseJwt (token) {\r",
+							"    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());\r",
+							"}\r",
+							"\r",
+							"if(pm.response.code == 200)\r",
+							"{\r",
+							"    var jsonData = pm.response.json();\r",
+							"\r",
+							"    pm.environment.set(\"accessToken\", jsonData.access);\r",
+							"    pm.environment.set(\"refreshToken\",jsonData.refresh);\r",
+							"\r",
+							"\r",
+							"    let tokenPayload = parseJwt(jsonData.access);\r",
+							"    pm.environment.set(\"userId\",tokenPayload.sub);\r",
+							"}\r",
+							"\r",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Inventory Service",
+			"item": [
+				{
+					"name": "GetStorage",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - slots\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('slots');\r",
+									"    pm.expect(responseData.slots).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/api/inventory/storage",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"storage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetInventory",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - slots\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('slots');\r",
+									"    pm.expect(responseData.slots).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/api/inventory",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEquipment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - slots\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('slots');\r",
+									"    pm.expect(responseData.slots).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/api/inventory/equipment",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"equipment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateStorage",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - slots\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('slots');\r",
+									"    pm.expect(responseData.slots).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"slots\": [\r\n        {\r\n            \"slot\": \"0\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"1\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"2\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"3\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"4\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"5\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"6\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"7\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"8\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"9\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"10\",\r\n            \"data\": {\r\n                \"count\": 5,\r\n                \"dataSpec\": \"/Script/Engine.BlueprintGeneratedClass'/Game/Gameplay/Inventory/InventoryItemData/BP_GoldInventoryData.BP_GoldInventoryData_C'\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"11\",\r\n            \"data\": {\r\n                \"count\": 5,\r\n                \"dataSpec\": \"/Script/Engine.BlueprintGeneratedClass'/Game/Gameplay/Inventory/InventoryItemData/BP_GoldInventoryData.BP_GoldInventoryData_C'\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"12\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"13\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"14\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"15\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"16\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"17\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"18\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"19\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"20\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"21\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"22\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"23\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"24\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"25\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"26\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"27\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"28\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"29\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"30\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"31\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"32\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"33\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"34\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"35\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"36\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"37\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"38\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"39\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"40\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"41\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"42\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"43\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"44\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"45\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"46\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"47\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"48\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"49\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"50\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"51\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"52\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"53\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"54\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"55\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"56\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"57\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"58\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"59\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"60\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"61\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"62\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"63\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"64\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"65\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"66\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"67\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"68\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"69\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"70\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"71\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/inventory/storage",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"storage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateInventory",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - slots\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('slots');\r",
+									"    pm.expect(responseData.slots).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"slots\": [\r\n        {\r\n            \"slot\": \"0\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"1\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"2\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"3\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"4\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"5\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"6\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"7\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"8\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"9\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"10\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"11\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"12\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"13\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"14\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"15\",\r\n            \"data\": {\r\n                \"count\": 1,\r\n                \"dataSpec\": \"/Script/Engine.BlueprintGeneratedClass'/Game/Gameplay/Inventory/InventoryItemData/BP_ArmorData.BP_ArmorData_C'\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"16\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"17\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"18\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"19\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"20\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"21\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"22\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"23\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"24\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"25\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"26\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"27\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"28\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"29\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"30\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"31\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"32\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"33\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"34\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"35\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"36\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"37\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"38\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"39\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/inventory",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateEquipment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - slots\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('slots');\r",
+									"    pm.expect(responseData.slots).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"slots\": [\r\n        {\r\n            \"slot\": \"Head\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"Upper\",\r\n            \"data\": {\r\n                \"count\": 1,\r\n                \"dataSpec\": \"/Script/Engine.BlueprintGeneratedClass'/Game/Gameplay/Inventory/InventoryItemData/BP_ArmorData.BP_ArmorData_C'\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"Lower\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"Feet\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"Hands\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"Necklace\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"Ring1\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"Ring2\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"MainWeapon1\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        },\r\n        {\r\n            \"slot\": \"ExtraWeapon1\",\r\n            \"data\": {\r\n                \"count\": 0,\r\n                \"dataSpec\": \"None\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/inventory/equipment",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"equipment"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment Service",
+			"item": [
+				{
+					"name": "CreatePayment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.code == 200)\r",
+									"{\r",
+									"    var responseData = pm.response.json();\r",
+									"    pm.environment.set(\"paymentId\", responseData.id);\r",
+									"}\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - order.lines, totalDetails\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('order');\r",
+									"    pm.expect(responseData.order).to.have.property('lines');\r",
+									"    pm.expect(responseData.order.lines).to.be.an('array');\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('totalDetails');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has calculated total\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    let total = 0;\r",
+									"    responseData.order.lines.forEach(function(item) {\r",
+									"        total +=item.pricePerUnit * item.count\r",
+									"    });\r",
+									"\r",
+									"    pm.expect(responseData.totalDetails.total).to.equal(total);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has status Processing\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData.status).to.equal(\"Processing\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customerId\": \"Shop\",\r\n  \"merchantId\": \"{{userId}}\",\r\n  \"order\": {\r\n    \"lines\": [\r\n      {\r\n        \"count\": 1,\r\n        \"name\": \"{{goldItemName}}\",\r\n        \"currency\": \"{{gameGoldCurrency}}\"\r\n      },\r\n      {\r\n        \"count\": 1,\r\n        \"name\": \"{{armorItemName}}\",\r\n        \"currency\": \"{{gameGoldCurrency}}\"\r\n      }\r\n    ]\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/payment",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetPayment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - order.lines, totalDetails\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('order');\r",
+									"    pm.expect(responseData.order).to.have.property('lines');\r",
+									"    pm.expect(responseData.order.lines).to.be.an('array');\r",
+									"\r",
+									"    pm.expect(responseData).to.have.property('totalDetails');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/api/payment/:paymentId",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"payment",
+								":paymentId"
+							],
+							"variable": [
+								{
+									"key": "paymentId",
+									"value": "{{paymentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePayment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customerId\": \"Shop\",\r\n  \"merchantId\": \"{{userId}}\",\r\n  \"order\": {\r\n    \"lines\": [\r\n      {\r\n        \"count\": 2,\r\n        \"name\": \"{{goldItemName}}\",\r\n        \"currency\": \"{{gameGoldCurrency}}\"\r\n      },\r\n      {\r\n        \"count\": 1,\r\n        \"name\": \"{{armorItemName}}\",\r\n        \"currency\": \"{{gameGoldCurrency}}\"\r\n      }\r\n    ]\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/payment/:paymentId",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"payment",
+								":paymentId"
+							],
+							"variable": [
+								{
+									"key": "paymentId",
+									"value": "{{paymentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ExecutePayment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/payment/:paymentId/execute",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"payment",
+								":paymentId",
+								"execute"
+							],
+							"variable": [
+								{
+									"key": "paymentId",
+									"value": "{{paymentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CancelPayment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/api/payment/:paymentId/cancel",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"payment",
+								":paymentId",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "paymentId",
+									"value": "{{paymentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAccount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/api/payment/account",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"payment",
+								"account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shop Service",
+			"item": [
+				{
+					"name": "GetPrices",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - id, uniqueName, price, and currency\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(item => {\r",
+									"        pm.expect(item).to.have.property('id');\r",
+									"        pm.expect(item).to.have.property('uniqueName');\r",
+									"        pm.expect(item).to.have.property('price');\r",
+									"        pm.expect(item).to.have.property('currency');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Price is in valid format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"\r",
+									"    responseData.forEach(function(item) {\r",
+									"        pm.expect(item.price).to.be.a('number');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Currency is in valid format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    const currency = pm.request.url.getPath().match(/\\/(\\w+)$/)[1]; \r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"\r",
+									"    responseData.forEach(function(item) {\r",
+									"        pm.expect(item.currency).to.be.a('string');\r",
+									"        pm.expect(item.currency).to.equal(currency); \r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/api/shop/prices/:currency?UniqueNames={{goldItemName}}&UniqueNames={{armorItemName}}",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"api",
+								"shop",
+								"prices",
+								":currency"
+							],
+							"query": [
+								{
+									"key": "UniqueNames",
+									"value": "{{goldItemName}}"
+								},
+								{
+									"key": "UniqueNames",
+									"value": "{{armorItemName}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "currency",
+									"value": "{{gameGoldCurrency}}"
+								}
+							]
+						},
+						"description": "# Retrieve Shop Prices by Currency\n\nThis endpoint allows you to retrieve the prices of specific items in the shop for a given currency.\n\n## Request\n\n### Path Parameters\n\n- `currency` (string, required): The currency for which the prices are to be retrieved.\n    \n\n### Query Parameters\n\n- `UniqueNames` (array of strings, required): The unique names of the items for which prices are to be retrieved.\n    \n\n### Response\n\nThe response will be a JSON object with the schema as follows:\n\n``` json\n{\n  \"currency\": \"string\",\n  \"prices\": {\n    \"Gold_Test_ItemPrice\": {\n      \"price\": \"number\"\n    },\n    \"Armor_Test_ItemPrice\": {\n      \"price\": \"number\"\n    }\n  }\n}\n\n ```"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "gameGoldCurrency",
+			"value": "GAME_GOLD",
+			"type": "string"
+		},
+		{
+			"key": "goldItemName",
+			"value": "Gold_Test_ItemPrice",
+			"type": "string"
+		},
+		{
+			"key": "armorItemName",
+			"value": "Armor_Test_ItemPrice",
+			"type": "string"
+		}
+	]
+}
