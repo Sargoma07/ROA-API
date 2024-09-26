@@ -40,14 +40,14 @@ public class AuthController(
         if (user is not null)
         {
             Logger.LogWarning("User already exists");
-            return BadRequest();
+            return Problem("Invalid auth data", statusCode: 400);
         }
-        
+
         var mapper = MapperFactory.GetMapper<IUserMapper>();
         user = mapper.MapFromDto(request);
         userRepository.AddOrUpdate(user);
         await DataContextManager.SaveAsync();
-            
+
         await userCreatedProducer.ProduceAsync(new UserCreatedEvent()
         {
             UserId = user.Id
@@ -57,10 +57,17 @@ public class AuthController(
         {
             ExternalId = request.ExternalId,
         };
-        
-        return await CreateToken(authData);
+
+        try
+        {
+            return await CreateToken(authData);
+        }
+        catch (InvalidOperationException)
+        {
+            return Problem("Invalid auth data", statusCode: 401);
+        }
     }
-    
+
     [HttpPost("signin")]
     public async Task<ActionResult<TokenModel>> SignIn([FromBody] SignInModel request)
     {
@@ -68,10 +75,17 @@ public class AuthController(
         {
             ExternalId = request.ExternalId,
         };
-        
-        return await CreateToken(authData);
+
+        try
+        {
+            return await CreateToken(authData);
+        }
+        catch (InvalidOperationException)
+        {
+            return Problem("Invalid auth data", statusCode: 401);
+        }
     }
-    
+
     [HttpPost]
     [Route("refreshToken")]
     public async Task<ActionResult<TokenModel>> RefreshToken([FromBody] RefreshTokenModel request)
@@ -84,38 +98,38 @@ public class AuthController(
         {
             throw new InvalidOperationException("Name claim not found");
         }
-        
+
         using var _ = Logger.BeginScope(new Dictionary<string, string>() { { "UserExternalId", nameClaim.Value } });
 
         var userRepository = DataContextManager.CreateRepository<IUserRepository>();
         var user = await userRepository.GetByExternalId(nameClaim.Value);
-        
+
         if (user is null)
         {
             Logger.LogInformation("User not found by external id");
-            return Unauthorized("Invalid refresh token");
+            return Unauthorized();
         }
 
         if (!user.RefreshTokenSessions.ContainsKey(request.Refresh))
         {
             Logger.LogInformation("Refresh token not found");
-            return Unauthorized("Invalid refresh token");
+            return Unauthorized();
         }
 
         user.RefreshTokenSessions.Remove(request.Refresh);
-        
+
         var refreshToken = GenerateRefreshToken();
         var refreshExpires = DateTime.UtcNow.AddDays(settings.Value.RefreshExpiresDays);
-        
+
         var authClaims = claimContainer.Claims.Where(x => x.Type != "aud");
         var token = CreateToken(authClaims);
-        
+
         user.RefreshTokenSessions.Add(refreshToken, new User.RefreshTokenSession
         {
             RefreshExpires = refreshExpires,
             AccessToken = token
         });
-        
+
         userRepository.AddOrUpdate(user);
         await DataContextManager.SaveAsync();
 
@@ -125,7 +139,7 @@ public class AuthController(
             Refresh = refreshToken,
         };
     }
-    
+
     private async Task<TokenModel> CreateToken(AuthDataDto authData)
     {
         using var _ = Logger.BeginScope(new Dictionary<string, string>() { { "UserExternalId", authData.ExternalId } });
@@ -137,7 +151,7 @@ public class AuthController(
         {
             throw new InvalidOperationException("User not found by external id");
         }
-        
+
         var authClaims = new List<Claim>
         {
             new(ClaimTypes.Name, authData.ExternalId),
@@ -149,7 +163,7 @@ public class AuthController(
 
         var refreshToken = GenerateRefreshToken();
         var refreshExpires = DateTime.UtcNow.AddDays(settings.Value.RefreshExpiresDays);
-        
+
         user.RefreshTokenSessions.Add(refreshToken, new User.RefreshTokenSession
         {
             RefreshExpires = refreshExpires,
@@ -158,7 +172,7 @@ public class AuthController(
 
         userRepository.AddOrUpdate(user);
         await DataContextManager.SaveAsync();
-        
+
         Logger.LogInformation("Token created");
 
         return new TokenModel()
@@ -171,9 +185,9 @@ public class AuthController(
     private string CreateToken(IEnumerable<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Value.Secret));
-        
-        var claims = authClaims.ToDictionary(x=>x.Type, object (x) =>x.Value);
-        
+
+        var claims = authClaims.ToDictionary(x => x.Type, object (x) => x.Value);
+
         var descriptor = new SecurityTokenDescriptor
         {
             Issuer = settings.Value.Issuer,
@@ -189,12 +203,12 @@ public class AuthController(
         {
             SetDefaultTimesOnTokenCreation = false
         };
-        
+
         var token = handler.CreateToken(descriptor);
 
         return token;
     }
-    
+
     private static string GenerateRefreshToken()
     {
         var randomNumber = new byte[64];
@@ -202,7 +216,7 @@ public class AuthController(
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
     }
-    
+
     private async Task<ClaimsIdentity> GetClaimsFromExpiredToken(string token)
     {
         var tokenValidationParameters = new TokenValidationParameters
@@ -212,13 +226,13 @@ public class AuthController(
             ValidIssuer = settings.Value.Issuer,
             ValidateIssuer = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Value.Secret)),
-            ValidateIssuerSigningKey = true,                
+            ValidateIssuerSigningKey = true,
             ValidateLifetime = false
         };
 
         var tokenHandler = new JsonWebTokenHandler();
         var result = await tokenHandler.ValidateTokenAsync(token, tokenValidationParameters);
-        
+
         return result.ClaimsIdentity;
     }
 }
