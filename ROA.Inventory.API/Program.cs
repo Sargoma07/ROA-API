@@ -9,6 +9,7 @@ using OpenTelemetry.Trace;
 using ROA.Infrastructure.Data;
 using ROA.Infrastructure.Data.Mongo;
 using ROA.Infrastructure.EventBus.Kafka;
+using ROA.Infrastructure.Identity;
 using ROA.Infrastructure.Trace.Extensions;
 using ROA.Inventory.API.Data;
 using ROA.Inventory.API.Data.Mapping;
@@ -69,10 +70,12 @@ public class Program
         ConfigureSettings(builder);
         ConfigureRepositories(builder);
         ConfigureEventBus(builder);
+        ConfigureCache(builder);
 
         builder.Services
             .AddControllers(options =>
             {
+                options.Filters.Add<ExistsAuthTokenInBlackListFilter>();
                 options.Filters.Add<UserActionFilter>();
             })
             .AddJsonOptions(options =>
@@ -191,5 +194,13 @@ public class Program
         builder.Services.AddHostedService<UserCreatedConsumerService>();
         builder.Services.AddSingleton<UserCreatedConsumer>();
         builder.Services.AddScoped<UserCreatedConsumeStrategy>();
+    }
+    
+    private static void ConfigureCache(WebApplicationBuilder builder)
+    {
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = builder.Configuration.GetValue<string>("Cache:ConnectionString");
+        });
     }
 }

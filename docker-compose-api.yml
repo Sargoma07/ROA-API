@@ -12,6 +12,14 @@
     volumes:
       - mongodb_data_container:/data/db
   
+  redis:
+    container_name: "roa.redis"
+    image: redis:latest
+    labels:
+      - "app.roa"
+    ports:
+      - "6379"
+  
   roa.payment.api:
     image: roa.payment.api
     container_name: "roa.payment.api"
@@ -21,6 +29,7 @@
       - "app.roa.api.payment"
     depends_on:
       - "roa.db"
+      - "redis"
       - "kafka"
     build:
       context: .
@@ -41,6 +50,7 @@
       - "app.roa.api.inventory"
     depends_on:
       - "roa.db"
+      - "redis"
       - "kafka"
     build:
       context: .
@@ -61,6 +71,7 @@
       - "app.roa.api.identity"
     depends_on:
       - "roa.db"
+      - "redis"
       - "kafka"
     build:
       context: .
@@ -81,6 +92,7 @@
       - "app.roa.api.shop"
     depends_on:
       - "roa.db"
+      - "redis"
       - "kafka"
     build:
       context: .
@@ -155,8 +167,8 @@
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_METRICS_PORT: 11001
-      KAFKA_CLUSTERS_0_METRICS_TYPE: PROMETHEUS        
-
+      KAFKA_CLUSTERS_0_METRICS_TYPE: PROMETHEUS
+      
 volumes:
   mongodb_data_container:
   payment_api_data_protection_container:

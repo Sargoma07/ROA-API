@@ -34,6 +34,7 @@ You can import postman collection in Postman from /tests/postman.
     - Polly - to provide resilience strategies such as Retry, Circuit Breaker, Hedging, Timeout, Rate Limiter and Fallback
 - DB 
   - Mongo  
+  - Redis
 - Grafana
   - Loki - logging tool
   - Alloy - collector for logs to loki 

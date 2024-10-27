@@ -2,7 +2,9 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -24,11 +26,14 @@ namespace ROA.Identity.API.Controllers;
 public class AuthController(
     IUserCreatedProducer userCreatedProducer,
     IOptions<AuthSettings> settings,
+    IDistributedCache cache,
     IDataContextManager dataContextManager,
     IMapperFactory mapperFactory,
     ILogger<AuthController> logger)
     : AbstractController(dataContextManager, mapperFactory, logger)
 {
+    private const string BlackListTokenCacheName = "AccessToken:BlackList";
+
     [HttpPost("signup")]
     public async Task<ActionResult<TokenModel>> SignUp([FromBody] SignUpModel request)
     {
@@ -112,7 +117,17 @@ public class AuthController(
 
         if (!user.RefreshTokenSessions.ContainsKey(request.Refresh))
         {
-            Logger.LogInformation("Refresh token not found");
+            Logger.LogInformation("Refresh token {refresh} not found", request.Refresh);
+            return Unauthorized();
+        }
+
+        if (user.RefreshTokenSessions.TryGetValue(request.Refresh, out var refreshTokenSession) &&
+            refreshTokenSession.RefreshExpires < DateTime.UtcNow)
+        {
+            Logger.LogInformation("Refresh token {refresh} is expired", request.Refresh);
+            user.RefreshTokenSessions.Remove(request.Refresh);
+            userRepository.AddOrUpdate(user);
+            await DataContextManager.SaveAsync();
             return Unauthorized();
         }
 
@@ -138,6 +153,38 @@ public class AuthController(
             Access = token,
             Refresh = refreshToken,
         };
+    }
+    
+    [HttpPost("signout")]
+    [Authorize]
+    public async Task<ActionResult<TokenModel>> SignOutAll()
+    {
+        var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+        var userId = userIdClaim?.Value;
+
+        if (userId is null)
+        {
+            Logger.LogWarning("User id not found");
+            return Ok();
+        }
+        
+        var userRepository = DataContextManager.CreateRepository<IUserRepository>();
+        var user = await userRepository.GetByIdAsync(userId);
+        
+        if (user is null)
+        {
+            Logger.LogWarning("User not found by id {userId}", userId);
+            return Ok();
+        }
+
+        var tokens = user.RefreshTokenSessions.Select(x => x.Value.AccessToken);
+        await AddAccessTokensToBlackList(tokens);
+
+        user.RefreshTokenSessions.Clear();
+        userRepository.AddOrUpdate(user);
+        await DataContextManager.SaveAsync();
+        
+        return Ok();
     }
 
     private async Task<TokenModel> CreateToken(AuthDataDto authData)
@@ -234,5 +281,19 @@ public class AuthController(
         var result = await tokenHandler.ValidateTokenAsync(token, tokenValidationParameters);
 
         return result.ClaimsIdentity;
+    }
+    
+    private async Task AddAccessTokensToBlackList(IEnumerable<string> tokens)
+    {
+        var tokenHandler = new JsonWebTokenHandler();
+        
+        foreach (var token in tokens)
+        {
+            var result = tokenHandler.ReadToken(token);
+            var expirationTime = result.ValidTo;
+            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(expirationTime);
+
+            await cache.SetStringAsync($"{BlackListTokenCacheName}:{token}", string.Empty, options);
+        }
     }
 }

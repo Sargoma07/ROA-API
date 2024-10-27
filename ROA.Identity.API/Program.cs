@@ -68,6 +68,7 @@ public class Program
         ConfigureSettings(builder);
         ConfigureRepositories(builder);
         ConfigureEventBus(builder);
+        ConfigureCache(builder);
 
         builder.Services
             .AddControllers()
@@ -185,5 +186,13 @@ public class Program
     {
         builder.Services.AddSingleton<KafkaClientHandle>();
         builder.Services.AddSingleton<IUserCreatedProducer, UserCreatedProducer>();
+    }
+    
+    private static void ConfigureCache(WebApplicationBuilder builder)
+    {
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = builder.Configuration.GetValue<string>("Cache:ConnectionString");
+        });
     }
 }
