@@ -116,31 +116,31 @@ public class PaymentController(
     {
         var accountId = accountContext.AccountId;
 
-        var paymentRepository = DataContextManager.CreateRepository<IPaymentRepository>();
-        var payment = await paymentRepository.GetPaymentByAccount(paymentId, accountId);
-
-        if (payment == null)
-        {
-            return NotFound();
-        }
-
-        if (!AllowToExecuteStatuses.Contains(payment.Status))
-        {
-            return NotFound();
-        }
-
-        using var _ = Logger.BeginScope(new Dictionary<string, object>
-        {
-            { "AccountId", accountId },
-            { "CustomerId", payment.CustomerId },
-            { "MerchantId", payment.MerchantId }
-        });
-
-        var dataLock = DataContextManager.CreateLock($"payment-{payment.Id}-execute");
+        var dataLock = DataContextManager.CreateLock($"payment-{paymentId}-execute");
         var lease = await dataLock.AcquireAsync();
 
         try
         {
+            var paymentRepository = DataContextManager.CreateRepository<IPaymentRepository>();
+            var payment = await paymentRepository.GetPaymentByAccount(paymentId, accountId);
+
+            if (payment == null)
+            {
+                return NotFound();
+            }
+
+            using var _ = Logger.BeginScope(new Dictionary<string, object>
+            {
+                { "AccountId", accountId },
+                { "CustomerId", payment.CustomerId },
+                { "MerchantId", payment.MerchantId }
+            });
+            
+            if (!AllowToExecuteStatuses.Contains(payment.Status))
+            {
+                return NotFound();
+            }
+            
             payment.Status = PaymentStatus.Completed;
             payment.AmountDetails.Amount = payment.TotalDetails.Total;
             payment.AmountDetails.Currency = payment.TotalDetails.Currency;
@@ -158,6 +158,10 @@ public class PaymentController(
             }
 
             await DataContextManager.SaveAsync();
+            
+            Logger.LogInformation("Payment {PaymentId} processed", payment.Id);
+            var mapper = MapperFactory.GetMapper<IPaymentMapper>();
+            return mapper.MapToDto(payment);
         }
         catch (Exception ex)
         {
@@ -168,10 +172,6 @@ public class PaymentController(
         {
             await dataLock.ReleaseAsync(lease);
         }
-
-        Logger.LogInformation("Payment {PaymentId} processed", payment.Id);
-        var mapper = MapperFactory.GetMapper<IPaymentMapper>();
-        return mapper.MapToDto(payment);
     }
 
     [HttpPost("{paymentId}/cancel")]
