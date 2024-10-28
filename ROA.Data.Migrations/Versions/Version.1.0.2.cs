@@ -1,69 +1,68 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDBMigrations;
+using Version = MongoDBMigrations.Version;
 
 namespace ROA.Data.Migrations.Versions;
 
-public class Version102 : IMigration
+public class Version102 : Migration
 {
-    public MongoDBMigrations.Version Version => new(1, 0, 2);
-
-    public string Name => "Version 1.0.2";
-
+    public Version102()
+    {
+        Version = new Version(1, 0, 2);
+        Name = "Version 1.0.2";
+    }
+    
     private const string ETagField = "ETag";
 
     private const string IdField = "_id";
-    private const string PriceId = "632468860d45ec833dcbb83e";
+    private const string ItemPriceId1 = "632468860d45ec833dcbb83e";
+    private const string ItemPriceId2 = "632468860d45ec833dcbb84e";
+    
+    private const string GameGoldCurrency = "GAME_GOLD";
 
-    private readonly Dictionary<string, decimal> _priceDetails = new()
+    protected override void UpExecute(IMongoDatabase database)
     {
-        {
-            "/Script/Engine.BlueprintGeneratedClass'/Game/Gameplay/Inventory/InventoryItemData/BP_GoldInventoryData.BP_GoldInventoryData_C'",
-            10m
-        },
-        {
-            "/Script/Engine.BlueprintGeneratedClass'/Game/Gameplay/Inventory/InventoryItemData/BP_ArmorData.BP_ArmorData_C'",
-            150m
-        }
-    };
-
-    public void Up(IMongoDatabase database)
-    {
-        Console.WriteLine("Updating collections");
-
         var collection = database.GetCollection<BsonDocument>("ItemPrice");
 
-        var playerDocument = new BsonDocument()
+        var item1 = new BsonDocument()
         {
-            { IdField, PriceId },
+            { IdField, ItemPriceId1 },
             { ETagField, Guid.NewGuid() },
             { "_t", "ItemPrice" },
-            { "PriceDetails", new BsonArray(GeneratePriceDetails(_priceDetails)) }
+            { "UniqueName", "Gold_Test_ItemPrice" },
+            { "Details", new BsonArray(CreatePriceDetails(GameGoldCurrency, 10)) }
         };
-        collection.InsertOne(playerDocument);
-
-        Console.WriteLine("Migration completed");
+        collection.InsertOne(item1);
+        
+        var item2 = new BsonDocument()
+        {
+            { IdField, ItemPriceId2 },
+            { ETagField, Guid.NewGuid() },
+            { "_t", "ItemPrice" },
+            { "UniqueName", "Armor_Test_ItemPrice" },
+            { "Details", new BsonArray(CreatePriceDetails(GameGoldCurrency, 150)) }
+        };
+        collection.InsertOne(item2);
     }
 
-    public void Down(IMongoDatabase database)
+    protected override void DownExecute(IMongoDatabase database)
     {
-        Console.WriteLine("Updating collections");
-
         var collection = database.GetCollection<BsonDocument>("ItemPrice");
-        collection.DeleteOne(x => x[IdField] == PriceId);
-
-        Console.WriteLine("Migration completed");
+        collection.DeleteOne(x => x[IdField] == ItemPriceId1);
+        
+        collection.DeleteOne(x => x[IdField] == ItemPriceId2);
     }
 
-    private static IEnumerable<BsonDocument> GeneratePriceDetails(Dictionary<string, decimal> prices)
+    private static IEnumerable<BsonDocument> CreatePriceDetails(string currency, decimal price)
     {
-        var slots = new List<BsonDocument>(prices.Count);
-        slots.AddRange(prices.Select(price => new BsonDocument()
+        var slots = new List<BsonDocument>
+        {
+            new()
             {
-                { "DataSpec", price.Key },
-                { "Price", price.Value }
+                { "Currency", currency },
+                { "Price", price }
             }
-        ));
+        };
 
         return slots;
     }

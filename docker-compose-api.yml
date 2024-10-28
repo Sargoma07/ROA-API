@@ -1,0 +1,177 @@
+﻿services:
+  roa.db:
+    container_name: "roa.db"
+    image: mongo:latest
+    labels:
+      - "app.roa"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data_container:/data/db
+  
+  redis:
+    container_name: "roa.redis"
+    image: redis:latest
+    labels:
+      - "app.roa"
+    ports:
+      - "6379"
+  
+  roa.payment.api:
+    image: roa.payment.api
+    container_name: "roa.payment.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
+      - "app.roa.api.payment"
+    depends_on:
+      - "roa.db"
+      - "redis"
+      - "kafka"
+    build:
+      context: .
+      dockerfile: ROA.Payment.API/Dockerfile
+    ports:
+      - "8080"
+    volumes:
+      - payment_api_data_protection_container:/root/.aspnet/DataProtection-Keys
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  
+  roa.inventory.api:
+    image: roa.inventory.api
+    container_name: "roa.inventory.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
+      - "app.roa.api.inventory"
+    depends_on:
+      - "roa.db"
+      - "redis"
+      - "kafka"
+    build:
+      context: .
+      dockerfile: ROA.Inventory.API/Dockerfile
+    ports:
+      - "8080"
+    volumes:
+      - inventory_api_data_protection_container:/root/.aspnet/DataProtection-Keys
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+        
+  roa.identity.api:
+    image: roa.identity.api
+    container_name: "roa.identity.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
+      - "app.roa.api.identity"
+    depends_on:
+      - "roa.db"
+      - "redis"
+      - "kafka"
+    build:
+      context: .
+      dockerfile: ROA.Identity.API/Dockerfile
+    ports:
+      - "8080"
+    volumes:
+      - identity_api_data_protection_container:/root/.aspnet/DataProtection-Keys
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+        
+  roa.shop.api:
+    image: roa.shop.api
+    container_name: "roa.shop.api"
+    labels:
+      - "app.roa"
+      - "app.roa.api"
+      - "app.roa.api.shop"
+    depends_on:
+      - "roa.db"
+      - "redis"
+      - "kafka"
+    build:
+      context: .
+      dockerfile: ROA.Shop.API/Dockerfile
+    ports:
+      - "8080"
+    volumes:
+      - shop_api_data_protection_container:/root/.aspnet/DataProtection-Keys
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      
+  roa.db.migrations:
+    image: roa-db-migrations
+    container_name: "roa.db.migrations"
+    labels:
+      - "app.roa"
+    depends_on:
+      - "roa.db"
+    build:
+      context: .
+      dockerfile: ROA.Data.Migrations/Dockerfile
+      
+  nginx:
+    image: nginx:latest
+    container_name: "roa.nginx"
+    labels:
+      - "app.roa"
+      - "app.roa.nginx"
+    volumes:
+      - ./devops/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./devops/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "5000:80"
+      - "5001:443"
+    depends_on:
+      - "roa.payment.api"
+      - "roa.inventory.api"
+      - "roa.identity.api"
+      - "roa.shop.api"
+  
+  kafka:
+    image: apache/kafka:latest
+    hostname: kafka
+    container_name: "roa.kafka"
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      #CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+  kafka.ui:
+    container_name: "kafka.ui"
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8100:8080"
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_METRICS_PORT: 11001
+      KAFKA_CLUSTERS_0_METRICS_TYPE: PROMETHEUS
+      
+volumes:
+  mongodb_data_container:
+  payment_api_data_protection_container:
+  inventory_api_data_protection_container:
+  identity_api_data_protection_container:
+  shop_api_data_protection_container:

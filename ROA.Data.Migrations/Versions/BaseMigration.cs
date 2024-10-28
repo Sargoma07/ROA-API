@@ -1,26 +1,21 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using MongoDBMigrations;
+﻿using MongoDB.Driver;
+using Version = MongoDBMigrations.Version;
 
 namespace ROA.Data.Migrations.Versions;
 
-public class BaseMigration : IMigration
+public class BaseMigration : Migration
 {
-    public MongoDBMigrations.Version Version => new(1, 0, 0);
-
-    public string Name => "Base migration";
-
-    public void Up(IMongoDatabase database)
+    public BaseMigration()
     {
-        Console.WriteLine("Updating collections");
-
-        Console.WriteLine("Migration completed");
+        Version = new Version(1, 0, 0);
+        Name = "Base migration";
     }
 
-    public void Down(IMongoDatabase database)
+    protected override void UpExecute(IMongoDatabase database)
     {
-        Console.WriteLine("Updating collections");
+    }
 
-        Console.WriteLine("Migration completed");
+    protected override void DownExecute(IMongoDatabase database)
+    {
     }
 }
