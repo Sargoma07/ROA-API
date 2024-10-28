@@ -1,6 +1,12 @@
 # Description
 
-It's a WEB API project for ROA game.
+It's a microservices WEB API project for RPG game where there are inventory and shop systems.
+Microservices have been developed for this purpose:
+
+- Identity service - authentication with JWT
+- Inventory service - collect data and update player inventory, equipment and store of game items
+- Payment service - service that handles payment and user account
+- Shop service - store price of game items
 
 ![[architecture]](./Attachments/architecture.jpg)
 
@@ -13,14 +19,22 @@ docker-compose -f docker-compose-api.yml docker-compose-grafana.yml -p roa-api u
 ### Postman 
 You can import postman collection in Postman from /tests/postman.
 
+![[integration-tests]](./Attachments/integration-tests.jpg)
+
+There are some test cases into [ROA-API Integrations Tests.postman_collection]: 
+- Setup - signup/create a new test user
+- Refresh token - process for getting a new access token
+- Update inventory - update inventory data for user
+- Execute payment - process that handles payment and check correct calculation of payment amount
+
 # Components
 - .Net C#
   - App
     - API
-      - roa.identity.api - identity service
-      - roa.inventory.api - inventory service
-      - roa.payment.api - service that handles payment
-      - roa.shop.api - shop service
+      - roa.identity.api
+      - roa.inventory.api
+      - roa.payment.api
+      - roa.shop.api
     - Utilities
       - roa.data.migrations - database migrations
   - Libs
