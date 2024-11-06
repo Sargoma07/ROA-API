@@ -1,10 +1,10 @@
 namespace ROA.Payment.API.Settings;
 
-public class AuthSettings
+public record AuthSettings
 {
-    public required string Secret { get; set; }
+    public required string Secret { get; init; }
 
-    public required string Issuer { get; set; }
+    public required string Issuer { get; init; }
 
-    public required string Audience { get; set; }
+    public required string Audience { get; init; }
 }

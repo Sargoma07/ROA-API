@@ -1,6 +1,6 @@
 ﻿namespace ROA.Identity.API.Settings;
 
-public class TopicSettings
+public record TopicSettings
 {
-    public string UserCreatedTopic { get; set; } = string.Empty;
+    public required string UserCreatedTopic { get; init; }
 }

@@ -1,7 +1,7 @@
 ﻿namespace ROA.Inventory.API.Settings;
 
-public class TopicSettings
+public record TopicSettings
 {
-    public required string UserCreatedTopic { get; set; }
-    public required string UserCreatedTopicError { get; set; }
+    public required string UserCreatedTopic { get; init; }
+    public required string UserCreatedTopicError { get; init; }
 }

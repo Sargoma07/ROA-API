@@ -14,7 +14,7 @@ public class User : IEntity
 
     public record RefreshTokenSession
     {
-        public required string AccessToken { get; set; }
-        public required DateTime RefreshExpires { get; set; }
+        public required string AccessToken { get; init; }
+        public required DateTime RefreshExpires { get; init; }
     }
 }

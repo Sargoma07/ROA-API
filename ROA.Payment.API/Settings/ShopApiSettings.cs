@@ -1,6 +1,6 @@
 ﻿namespace ROA.Payment.API.Settings;
 
-public class ShopApiSettings
+public record ShopApiSettings
 {
-    public required string BaseAddress { get; set; }
+    public required string BaseAddress { get; init; }
 }

@@ -22,12 +22,13 @@ public class Payment : IEntity
     public DateTime Updated { get; set; }
 
 
-    public record PaymentOrder
+    public class PaymentOrder
     {
         public IList<OrderLine> Lines { get; set; } = new List<OrderLine>();
     }
 
-    public record OrderLine
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class OrderLine
     {
         public required string Name { get; set; }
         public int Count { get; set; }
@@ -35,13 +36,13 @@ public class Payment : IEntity
         public required string Currency { get; set; }
     }
 
-    public record PaymentAmountDetails
+    public class PaymentAmountDetails
     {
         public decimal Amount { get; set; }  = 0.0m;
         public  string Currency { get; set; } = string.Empty;
     }
 
-    public record PaymentTotalDetails
+    public class PaymentTotalDetails
     {
         public decimal Total { get; set; } = 0.0m;  
         public  string Currency { get; set; } = string.Empty;

@@ -11,13 +11,15 @@ public class Inventory : IEntity
     public InventoryType Type { get; set; }
     public IList<InventoryItemSlot> Slots { get; set; } = new List<InventoryItemSlot>();
 
-    public record InventoryItemSlot
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class InventoryItemSlot
     {
         public required string Slot { get; set; }
-        public InventoryItem Data { get; set; }
+        public required InventoryItem Data { get; set; }
     }
 
-    public record InventoryItem
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class InventoryItem
     {
         public int Count { get; set; }
         public required string DataSpec { get; set; }

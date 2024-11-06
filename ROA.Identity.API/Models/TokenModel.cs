@@ -1,7 +1,7 @@
 namespace ROA.Identity.API.Models;
 
-public class TokenModel
+public record TokenModel
 {
-    public required string Access { get; set; } 
-    public required string Refresh { get; set; }
+    public required string Access { get; init; } 
+    public required string Refresh { get; init; }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ROA.Identity.API.Domain.Dtos;
 
-public class AuthDataDto
+public record AuthDataDto
 {
-    public string ExternalId { get; set; } = string.Empty;
+    public required string ExternalId { get; init; }
 }

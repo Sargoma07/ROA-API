@@ -1,6 +1,6 @@
 ﻿namespace ROA.Payment.API.Domain;
 
-public class CurrencyCode
+public static class CurrencyCode
 {
     public const string GameGold = "GAME_GOLD";
 }

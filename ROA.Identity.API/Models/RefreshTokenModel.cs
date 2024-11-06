@@ -1,8 +1,8 @@
 
 namespace ROA.Identity.API.Models;
 
-public class RefreshTokenModel
+public record RefreshTokenModel
 {
-    public string Access { get; set; } = string.Empty;
-    public string Refresh { get; set; } =  string.Empty;
+    public string Access { get; init; } = string.Empty;
+    public string Refresh { get; init; } =  string.Empty;
 }

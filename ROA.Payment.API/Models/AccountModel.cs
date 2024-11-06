@@ -1,12 +1,12 @@
 ﻿namespace ROA.Payment.API.Models;
 
-public class AccountModel
+public record AccountModel
 {
-    public IList<BalanceDataModel> Balances { get; set; } = new List<BalanceDataModel>();
+    public IList<BalanceDataModel> Balances { get; init; } = new List<BalanceDataModel>();
 
     public record BalanceDataModel
     {
-        public required string Currency { get; set; }
-        public decimal Amount { get; set; }
+        public required string Currency { get; init; }
+        public decimal Amount { get; init; }
     }
 }

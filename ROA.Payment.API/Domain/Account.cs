@@ -8,7 +8,7 @@ public class Account : IEntity
     public Guid ETag { get; set; }
     public IList<BalanceData> Balances { get; set; } = new List<BalanceData>();
     
-    public record BalanceData
+    public class BalanceData
     {
         public required string Currency { get; set; }
         public decimal Amount { get; set; }

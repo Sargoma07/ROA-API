@@ -1,20 +1,20 @@
 ﻿namespace ROA.Inventory.API.Models;
 
-public class InventoryModel
+public record InventoryModel
 {
-    public string? Id { get; set; }
+    public string? Id { get; init; }
 
-    public IList<InventoryItemSlotModel> Slots { get; set; } = new List<InventoryItemSlotModel>();
+    public IList<InventoryItemSlotModel> Slots { get; init; } = new List<InventoryItemSlotModel>();
 
     public record InventoryItemSlotModel
     {
-        public required string Slot { get; set; }
-        public InventoryItemModel? Data { get; set; }
+        public required string Slot { get; init; }
+        public required InventoryItemModel Data { get; init; }
     }
 
     public class InventoryItemModel
     {
-        public int Count { get; set; }
-        public required string DataSpec { get; set; }
+        public int Count { get; init; }
+        public required string DataSpec { get; init; }
     }
 }
